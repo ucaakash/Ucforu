@@ -524,11 +524,35 @@ banner.style.textAlign = "center";
 
 banner.innerHTML = `
 <h3>⚔️ Friend Challenge</h3>
-<p>Your friend challenged you to beat their screen time.</p>
-<p>Upload your screenshot and try to win 🏆</p>
+<p>Loading challenge...</p>
 `;
 
 document.querySelector("main").prepend(banner);
+
+// Firebase se challenge load
+database.ref("challenges/"+challengeID).once("value").then((snap)=>{
+
+if(snap.exists()){
+
+const data = snap.val();
+
+window.challengeData = data;
+
+banner.innerHTML = `
+<h3>⚔️ Challenge From ${data.creator}</h3>
+<p>Screen Time: ${Math.floor(data.creatorTime/60)}h ${data.creatorTime%60}m</p>
+<p>Upload your screenshot to beat this score 🏆</p>
+`;
+
+}else{
+
+banner.innerHTML = `
+<h3>Challenge not found</h3>
+`;
+
+}
+
+});
 
 }
 
