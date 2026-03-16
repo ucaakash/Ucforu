@@ -365,6 +365,29 @@ currentNickname = nickname;
               formattedTime: timeString
               });
             }
+            // Challenge winner check
+            
+            if(window.challengeData){
+            
+            const creatorTime = window.challengeData.creatorTime;
+            
+            let winner;
+            
+            if(totalMinutes < creatorTime){
+            winner = nickname;
+            }else{
+            winner = window.challengeData.creator;
+            }
+            
+            alert("🏆 Winner: " + winner);
+            
+            database.ref("challenges/"+window.challengeID).update({
+            opponent: nickname,
+            opponentTime: totalMinutes,
+            winner: winner
+            });
+            
+            }
 
         } catch (error) {
             console.error(error);
@@ -523,9 +546,9 @@ banner.style.marginBottom = "20px";
 banner.style.textAlign = "center";
 
 banner.innerHTML = `
-<h3>⚔️ Friend Challenge</h3>
-<p>Your friend challenged you to beat their screen time.</p>
-<p>Upload your screenshot and try to win 🏆</p>
+<h3>⚔️ ${data.creator} challenged you!</h3>
+<p>Their screen time: ${Math.floor(data.creatorTime/60)}h ${data.creatorTime%60}m</p>
+<p>Upload your screenshot to see who wins 🏆</p>
 `;
 
 document.querySelector("main").prepend(banner);
