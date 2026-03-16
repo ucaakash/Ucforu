@@ -321,7 +321,7 @@ currentNickname = nickname;
             document.getElementById('processing').style.display = 'none';
             document.getElementById('result').style.display = 'block';
 
-// ⚔️ Challenge Winner Logic
+// ⚔️ VS Battle Result
 if(window.challengeData){
 
 let creatorTime = window.challengeData.creatorTime;
@@ -332,17 +332,36 @@ let winner = currentUserTime > creatorTime
 
 const resultBox = document.createElement("div");
 
-resultBox.style.background = "rgba(0,0,0,0.4)";
-resultBox.style.padding = "20px";
-resultBox.style.borderRadius = "15px";
-resultBox.style.marginTop = "20px";
+resultBox.style.background = "linear-gradient(135deg,#ff416c,#ff4b2b)";
+resultBox.style.padding = "25px";
+resultBox.style.borderRadius = "20px";
+resultBox.style.marginBottom = "20px";
+resultBox.style.color = "white";
 resultBox.style.textAlign = "center";
+resultBox.style.boxShadow = "0 10px 30px rgba(0,0,0,0.3)";
 
 resultBox.innerHTML = `
-<h2>⚔️ Challenge Result</h2>
-<p>${window.challengeData.creator} ${Math.floor(creatorTime/60)}h ${creatorTime%60}m</p>
-<p>${currentNickname} ${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m</p>
-<h3 style="margin-top:10px">🏆 Winner: ${winner}</h3>
+<h2 style="margin-bottom:15px;">⚔️ Screen Time Battle</h2>
+
+<div style="display:flex;justify-content:space-between;align-items:center;font-size:18px;margin-bottom:15px;">
+
+<div style="flex:1">
+<strong>${window.challengeData.creator}</strong><br>
+${Math.floor(creatorTime/60)}h ${creatorTime%60}m
+</div>
+
+<div style="font-size:28px;padding:0 10px;">VS</div>
+
+<div style="flex:1">
+<strong>${currentNickname}</strong><br>
+${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m
+</div>
+
+</div>
+
+<div style="font-size:22px;font-weight:700;background:white;color:#333;padding:10px;border-radius:12px;display:inline-block;">
+🏆 Winner: ${winner}
+</div>
 `;
 
 document.getElementById("result").prepend(resultBox);
