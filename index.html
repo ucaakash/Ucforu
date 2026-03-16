@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCforU - Viral Screen Time Card</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --text-main: #ffffff;
+            --text-dark: #2d3436;
+            --accent-color: #ff4757;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+
+        /* Animated Colorful Background */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        h1, h2, h3 { font-family: 'Playfair Display', serif; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+        /* Glassmorphism Containers */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        header { text-align: center; margin-bottom: 20px; }
+        header h1 { font-size: 3.5rem; letter-spacing: 2px; }
+        header p { font-size: 1.1rem; opacity: 0.9; margin-top: 5px; }
+
+        .input-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; }
+        
+        input[type="text"], input[type="file"] {
+            width: 100%; padding: 15px; border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255,255,255,0.6);
+            color: var(--text-dark);
+            font-family: 'Inter', sans-serif; font-size: 1rem;
+            transition: all 0.3s;
+        }
+        input[type="text"]:focus { background: rgba(255,255,255,0.9); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        
+        input[type="file"]::file-selector-button {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            color: var(--text-dark); border: none; padding: 10px 20px;
+            border-radius: 8px; cursor: pointer; font-weight: 600; margin-right: 15px;
+        }
+
+        button {
+            width: 100%; padding: 16px; border: none; border-radius: 12px;
+            font-size: 1.2rem; font-weight: 600; cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 15px;
+        }
+        button.primary {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            color: white; box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4);
+        }
+        button.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 75, 43, 0.6); }
+        
+        button.secondary {
+            background: rgba(255,255,255,0.9); color: var(--text-dark);
+        }
+
+        /* Loading Animation */
+        #processing, #result { display: none; text-align: center; }
+        .spinner {
+            width: 60px; height: 60px; border: 6px solid rgba(255,255,255,0.3);
+            border-top-color: #fff; border-radius: 50%;
+            animation: spin 1s linear infinite; margin: 0 auto 20px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- THE VIRAL CARD DESIGN (Hidden from DOM, used for Image Generation) --- */
+        #card-render-container {
+            position: absolute; top: -9999px; left: -9999px;  width: 1080px; height:1720px;/* Hide offscreen */
+        }
+        .instagram-card {
+            width: 1080px; height: 1720px; /* High Res Square for IG */
+            background-color: #fdfaf6; /* Cream background */
+            background-image: radial-gradient(#ffb7b2 1px, transparent 1px);
+            background-size: 40px 40px; /* Subtle dotted pattern */
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 80px; text-align: center; color: #2d3436;
+            box-sizing: border-box; position: relative;
+        
+        }
+        /* Floral borders simulation using emojis and positioning */
+        .floral-top { position: absolute; top: 40px; left: 40px; font-size: 80px; }
+        .floral-bottom { position: absolute; bottom: 40px; right: 40px; font-size: 80px; transform: scaleX(-1); }
+
+        .card-header-icon { font-size: 50px; margin-bottom: 10px; }
+        .card-title { font-family: 'Playfair Display', serif; font-size: 55px; font-weight: 700; color: #1e3799; letter-spacing: 4px; margin-bottom: 20px; text-transform: uppercase;}
+        .card-subtitle { font-family: 'Inter', sans-serif; font-size: 35px; color: #636e72; margin-bottom: 60px; }
+        
+        .card-name { font-family: 'Great Vibes'; font-size: 110px; color: #e55039; margin-bottom: 40px; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); line-height: 1; }
+        .card-time { font-family: 'Inter', sans-serif; font-size: 45px; font-weight: 600; color: #2d3436; margin-bottom: 60px; background: rgba(229, 80, 57, 0.1); padding: 15px 40px; border-radius: 50px;}
+        
+        .card-shayari { font-family: 'Playfair Display', serif; font-size: 45px; font-style: italic; color: #2d3436; line-height: 1.5; padding: 0 40px; margin-bottom: 60px;}
+        
+        .card-divider { font-size: 30px; letter-spacing: 5px; color: #b2bec3; margin-bottom: 20px;}
+        .card-footer { font-family: 'Inter', sans-serif; font-size: 30px; font-weight: 600; color: #e55039; letter-spacing: 2px;}
+
+        /* Displayed Generated Image */
+        #generated-image-preview {
+            width: 100%; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 25px; border: 4px solid white;
+        }
+
+        /* Leaderboard */
+        .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden;}
+        .leaderboard-table th, .leaderboard-table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .leaderboard-table th { font-weight: 600; background: rgba(0,0,0,0.2); }
+        .rank { width: 40px; font-weight: bold; color: #ffeaa7; text-align: center;}
+        .time { font-weight: bold; text-align: right;}
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>UCforU</h1>
+    <p>Analyze & Share Your Digital Rhythm</p>
+</header>
+
+<main style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+    
+    <div id="inputForm" class="glass-card">
+        <div class="input-group">
+            <label for="nickname">Your Nickname</label>
+            <input type="text" id="nickname" placeholder="e.g., Akash Maurya">
+        </div>
+        <div class="input-group">
+            <label for="screenshot">Upload Screen Time Image</label>
+            <input type="file" id="screenshot" accept="image/png, image/jpeg, image/webp">
+        </div>
+        <button id="analyzeBtn" class="primary">Reveal My Digital Self✨</button>
+    </div>
+
+    <div id="processing" class="glass-card">
+        <div class="spinner"></div>
+        <h2>Analyzing Image...</h2>
+        <p style="margin-top:10px; opacity:0.8;">Reading your digital rhythm via AI...</p>
+    </div>
+
+    <div id="result" class="glass-card">
+        <h2>Your Reality Card</h2>
+        <p style="margin-bottom: 20px; font-size: 0.9rem;">Long press image to save, or use button below.</p>
+        
+        <img id="generated-image-preview" src="" alt="Your Screen Time Card">
+
+        <button id="downloadBtn" class="primary">Download Card ⬇️</button>
+        <button id="shareBtn" class="secondary" style="background: rgba(255,255,255,0.2); color: white;">Share Link 🔗</button>
+      <button id="challengeBtn" class="secondary" style="background: rgba(255,255,255,0.2); color: white;">Challenge Friends ⚔️</button>  
+        <button onclick="location.reload()" style="background:none; border:none; color:white; margin-top:10px; text-decoration: underline;">Analyze Another</button>
+    </div>
+
+    <div id="leaderboard" class="glass-card">
+        <h2 style="text-align: center;">🏆 Leaderbord (Today)</h2>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th class="rank">#</th>
+                    <th>Name</th>
+                    <th class="time">Time</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboardBody">
+                <tr><td colspan="3" style="text-align:center;">Loading...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<div id="card-render-container">
+    <div id="instagram-card" class="instagram-card">
+        <div class="floral-top">🌿</div>
+        
+        <div class="card-header-icon">🌸</div>
+        <div class="card-title">SCREEN TIME</div>
+        <div class="card-subtitle">Thank You for Your Coming</div>
+        
+        <div class="card-name" id="render-name">Name</div>
+        <div class="card-time" id="render-time">0h 0m screen time</div>
+        
+        <div class="card-shayari" id="render-shayari">Shayari goes here</div>
+        
+        <div class="card-divider">❤️─────💐─────❤️</div>
+        <div class="card-footer">ucforu.online<br>
+        <span style="font-size: 50px; margin-top:50px; display:inline-block;">🌸</span></div>
+         <br>=	 <div id="viral-card">
+    <div id="qrcode-container"></div> 
+</div>
+
+        <div class="floral-bottom">🌿</div>
+    </div>
+</div>
+
+<script>
+    const shayaris = [ 
+        "Phone ki duniya mein aise dil lagaya, battery 100 se 0 kab aayi, pata hi nahi chala!", 
+        "Itna scroll kar liya ki ab sapno mein bhi Reels chal rahi hain.", 
+        "Zindagi mein itni clarity nahi hai, jitni mere phone ke screen brightness mein hai.", 
+        "Hum toh chale the kuch 'Productive' karne, par phone uthate hi 3 ghante nikal gaye.", 
+        "Log kehte hain 'Don't waste time', hum kehte hain 'Bas ek aur Reel phir kaam shuru'.",
+        "Humne waqt nahi, waqt ne humein scroll kar diya!",
+        "Kaash itna focus main padhai par karta, toh aaj shayad NASA mein hota.",
+        "Suno, phone rakho aur muskurao, kyunki aap bahut cute ho!",
+        "Itne ghante phone chalane ke baad bhi, dimag mein sirf 'Empty' likha hai."
+    ];
+
+    // --- Firebase Configuration ---
+    const firebaseConfig = {
+    apiKey: "AIzaSyCeJWTbIF3mD43ihcoCZJ8LO-b896-FWa4",
+    authDomain: "ucforu-730a7.firebaseapp.com",
+    projectId: "ucforu-730a7",
+    storageBucket: "ucforu-730a7.firebasestorage.app",
+    messagingSenderId: "315045659904",
+    appId: "1:315045659904:web:2e1700a51aae71a8a29fe5",
+    measurementId: "G-899BZCPKR2",
+    databaseURL: "https://ucforu-730a7-default-rtdb.firebaseio.com"
+    
+    };
+
+    let database = null;
+    // Initialization logic v10+ ke liye
+    try {
+    firebase.initializeApp(firebaseConfig);
+    database = firebase.database();
+    console.log("Firebase initialized successfully");
+    loadLeaderboard();
+    } catch (error) {
+    console.error("Firebase init error:", error);
+    }
+    let currentUserTime = 0;
+    let currentNickname = "";
+
+    // --- Core Logic ---
+    document.getElementById('analyzeBtn').addEventListener('click', async () => {
+        const nickname = document.getElementById('nickname').value.trim();
+        const file = document.getElementById('screenshot').files[0];
+
+        if (!nickname) return alert("Please enter your nickname.");
+        if (!file) return alert("Please upload a screenshot.");
+
+        document.getElementById('inputForm').style.display = 'none';
+        document.getElementById('processing').style.display = 'block';
+
+        try {
+            // 1. OCR processing
+            const { data: { text } } = await Tesseract.recognize(file, 'eng');
+            const { hours, minutes, totalMinutes } = parseScreentime(text);
+            const timeString = `${hours}h ${minutes}m`;
+currentUserTime = totalMinutes;
+currentNickname = nickname;
+            // 2. Select Shayari
+            const randomShayari = shayaris[Math.floor(Math.random() * shayaris.length)];
+
+            // 3. Populate the hidden render card
+            document.getElementById('render-name').innerText = nickname;
+            document.getElementById('render-time').innerText = `${timeString} screen time`;
+            document.getElementById('render-shayari').innerText = `"${randomShayari}"`;
+
+            // 4. Ensure fonts are loaded before taking screenshot
+            await document.fonts.ready;
+
+            // 5. Generate Image via HTML2Canvas
+            const renderCard = document.getElementById('instagram-card');
+            const canvas = await html2canvas(renderCard, {
+                scale: 1, // 1080x1080 is already high res
+                useCORS: true,
+                backgroundColor: "#fdfaf6"
+            });
+
+            const imageDataUrl = canvas.toDataURL("image/png");
+
+            // 6. Display Result
+            document.getElementById('generated-image-preview').src = imageDataUrl;
+            document.getElementById('processing').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+
+            // Setup Download Button
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.onclick = () => {
+                const link = document.createElement('a');
+                link.download = `UCforU_${nickname.replace(/\s+/g, '_')}.png`;
+                link.href = imageDataUrl;
+                link.click();
+            };
+
+            // Setup Share Button
+            
+            document.getElementById('shareBtn').onclick = async () => {
+            const canvas = document.getElementById('instagram-card'); // Tumhara card div
+            
+            // Canvas se image generate karo
+            const canvasImg = await html2canvas(canvas);
+            canvasImg.toBlob(async (blob) => {
+            const file = new File([blob], "DigitalRhythm.png", { type: "image/png" });
+            
+            // Check karo kya device share support karta hai
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+            files: [file],
+            title: 'My Digital Rhythm',
+            text: 'Check out my today\'s screen time card!',
+            url: 'https://ucforu.online'
+            });
+            } else {
+            alert("Oops! Share feature is not supported on this browser/device.");
+            }
+            });
+            };
+            
+            // 7. Submit to Firebase Leaderboard
+            if (database) {
+                const dailyKey = new Date().toISOString().split('T')[0];
+              const userKey = btoa(nickname + navigator.userAgent).replace(/=/g,"");
+              
+              database.ref(`leaderboard/${dailyKey}/${userKey}`).set({
+              nickname,
+              totalMinutes,
+              formattedTime: timeString
+              });
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert("Failed to analyze image. Please ensure it's a clear screen time screenshot.");
+            location.reload();
+        }
+    });
+
+    function parseScreentime(text) {
+        let hours = 0, minutes = 0;
+        const cleanText = text.toLowerCase().replace(/\s+/g, ' ');
+        const match1 = cleanText.match(/(\d+)\s*h\s*(\d+)\s*m/);
+        const match2 = cleanText.match(/(\d+)\s*hours?\s*(\d+)\s*min/);
+        if (match1) { hours = parseInt(match1[1]); minutes = parseInt(match1[2]); }
+        else if (match2) { hours = parseInt(match2[1]); minutes = parseInt(match2[2]); }
+        else {
+            const hMatch = cleanText.match(/(\d+)\s*(h|hour)/);
+            const mMatch = cleanText.match(/(\d+)\s*(m|min)/);
+            if(hMatch) hours = parseInt(hMatch[1]);
+            if(mMatch) minutes = parseInt(mMatch[1]);
+        }
+        hours = isNaN(hours) ? 0 : hours; minutes = isNaN(minutes) ? 0 : minutes;
+        return { hours, minutes, totalMinutes: (hours * 60) + minutes };
+    }
+function loadLeaderboard() {
+    const dailyKey = new Date().toISOString().split('T')[0];
+    const tbody = document.getElementById('leaderboardBody');
+    
+    // Yahan 'snap' ka use kiya hai
+    database.ref('leaderboard/' + dailyKey).orderByChild('totalMinutes').limitToLast(50).on('value', (snap) => {
+        tbody.innerHTML = "";
+        
+        if (snap.exists()) {
+            let results = [];
+            // 'snap' ka hi use karenge
+            snap.forEach((child) => { results.push(child.val()); });
+            results.reverse();
+            
+            results.forEach((data, index) => {
+                const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
+                // Template literals backtick (`) ke andar
+                tbody.innerHTML += `<tr>
+                    <td>${medal}</td>
+                    <td>${data.nickname}</td>
+                    <td style="text-align: right;">${data.formattedTime}</td>
+                </tr>`;
+            });
+        } else {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No data yet</td></tr>';
+        }
+    });
+}
+// QR code generate karne ka function
+function generateMyQR() {
+    // Purane QR ko clear karne ke liye (agar dubara generate ho raha ho)
+    document.getElementById("qrcode-container").innerHTML = "";
+
+    new QRCode(document.getElementById("qrcode-container"), {
+        text: "https://ucforu.online", // Aapka domain
+        width: 130,  // Size chota rakhenge card ke liye
+        height: 130,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+    });
+}
+
+// Jab 'Reveal My Digital Self' button click ho, tab isse call karein
+generateMyQR();
+
+// Function band hone ke baad koi extra bracket nahi hona chahiye!
+document.addEventListener("DOMContentLoaded", () => {
+
+const challengeBtn = document.getElementById("challengeBtn");
+
+if(!challengeBtn){
+console.log("Challenge button not found");
+return;
+}
+
+challengeBtn.addEventListener("click", async () => {
+
+try{
+
+const challengeID = btoa(currentNickname + Date.now()).replace(/=/g,"");
+
+const challengeLink = `${location.origin}${location.pathname}?challenge=${challengeID}`;
+
+if(database){
+database.ref("challenges/"+challengeID).set({
+creator: currentNickname,
+creatorTime: currentUserTime,
+timestamp: firebase.database.ServerValue.TIMESTAMP
+});
+}
+
+const canvas = document.getElementById("instagram-card");
+const canvasImg = await html2canvas(canvas);
+
+canvasImg.toBlob(async (blob)=>{
+
+const file = new File([blob], "ChallengeCard.png", {type:"image/png"});
+
+const shareText =
+`⚔️ Screen Time Challenge
+
+My screen time today: ${currentUserTime} minutes
+
+Can you beat me? 😎
+
+${challengeLink}`;
+
+if(navigator.canShare && navigator.canShare({files:[file]})){
+
+await navigator.share({
+files:[file],
+title:"Screen Time Challenge",
+text:shareText,
+url:challengeLink
+});
+
+}else{
+
+navigator.clipboard.writeText(challengeLink);
+
+alert("Challenge link copied! Send to your friend 🔥");
+
+}
+
+});
+
+}catch(err){
+
+console.error(err);
+alert("Challenge failed");
+
+}
+
+});
+
+});
+</script>
+
+</body>
+</html>
