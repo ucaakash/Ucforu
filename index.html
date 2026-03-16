@@ -20,82 +20,82 @@
 
     <style>
     .flower-battle{
-    background:white;
-    color:#333;
-    padding:25px;
-    border-radius:18px;
-    margin-bottom:20px;
-    text-align:center;
-    box-shadow:0 10px 35px rgba(0,0,0,0.15);
-    position:relative;
-    overflow:hidden;
-    animation:cardPop .5s ease;
-    }
-    
-    .battle-title{
-    font-size:24px;
-    font-weight:700;
-    margin-bottom:15px;
-    }
-    
-    .battle-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    }
-    
-    .player-box{
-    flex:1;
-    background:#f7f7f7;
-    padding:15px;
-    border-radius:12px;
-    }
-    
-    .player-name{
-    font-size:18px;
-    font-weight:700;
-    }
-    
-    .player-time{
-    font-size:20px;
-    margin-top:5px;
-    }
-    
-    .vs{
-    font-size:22px;
-    font-weight:700;
-    }
-    
-    .winner-text{
-    margin-top:15px;
-    font-size:22px;
-    font-weight:700;
-    color:#ff4081;
-    }
-    
-    .flower{
-    position:absolute;
-    top:-20px;
-    font-size:20px;
-    animation:flowerFall linear infinite;
-    }
-    
-    @keyframes flowerFall{
-    0%{
-    transform:translateY(-20px) rotate(0deg);
-    opacity:1;
-    }
-    100%{
-    transform:translateY(350px) rotate(360deg);
-    opacity:0;
-    }
-    }
-    
-    @keyframes cardPop{
-    from{opacity:0;transform:scale(.9)}
-    to{opacity:1;transform:scale(1)}
-    }
+background:white;
+color:#333;
+padding:25px;
+border-radius:18px;
+margin-bottom:20px;
+text-align:center;
+box-shadow:0 10px 35px rgba(0,0,0,0.15);
+position:relative;
+overflow:hidden;
+animation:cardPop .5s ease;
+font-family:'Playfair Display',serif;
+}
+
+.battle-title{
+font-size:26px;
+font-weight:700;
+margin-bottom:15px;
+}
+
+.battle-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+}
+
+.player-box{
+flex:1;
+background:#f7f7f7;
+padding:15px;
+border-radius:12px;
+}
+
+.player-name{
+font-size:18px;
+font-weight:700;
+}
+
+.player-time{
+font-size:20px;
+margin-top:5px;
+}
+
+.vs{
+font-size:22px;
+font-weight:700;
+}
+
+.winner-text{
+margin-top:15px;
+font-size:22px;
+font-weight:700;
+color:#ff4081;
+}
+
+.flower{
+position:absolute;
+top:-20px;
+font-size:20px;
+animation:flowerFall linear infinite;
+opacity:.9;
+}
+
+@keyframes flowerFall{
+0%{
+transform:translateY(-20px) rotate(0deg);
+}
+100%{
+transform:translateY(350px) rotate(360deg);
+}
+}
+
+@keyframes cardPop{
+from{opacity:0;transform:scale(.9)}
+to{opacity:1;transform:scale(1)}
+}
         :root {
             --glass-bg: rgba(255, 255, 255, 0.25);
             --glass-border: rgba(255, 255, 255, 0.4);
@@ -443,7 +443,7 @@ document.getElementById("result").prepend(card);
 // Flower animation
 const flowers=["🌸","💐","🌹"];
 
-for(let i=0;i<25;i++){
+for(let i=0;i<14;i++){
 
 let f=document.createElement("div");
 f.className="flower";
