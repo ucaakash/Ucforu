@@ -373,7 +373,7 @@ currentNickname = nickname;
             
             let winner;
             
-            if(totalMinutes < creatorTime){
+            if(totalMinutes > creatorTime){
             winner = nickname;
             }else{
             winner = window.challengeData.creator;
