@@ -184,17 +184,21 @@
         <h2>Analyzing Image...</h2>
         <p style="margin-top:10px; opacity:0.8;">Reading your digital self via AI...</p>
     </div>
-<div id="battleResult" style="display:none; margin: 25px auto; width: 90%; max-width: 500px;">
-    <div style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 30px; border-radius: 25px; color: white; text-align: center; border: 3px solid #ffcc00; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-        
-        <div style="font-size: 40px; margin-bottom: 10px;">🏆</div>
-        <h2 style="font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 15px; letter-spacing: 1px;">VICTORY DECLARED!</h2>
-        
-        <div id="battlePlayers" style="font-size: 16px; opacity: 0.9; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px;"></div>
-        
-        <div id="battleWinner" style="font-size: 24px; font-weight: 800; color: #ffcc00; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,204,0,0.5);"></div>
-    </div>
+<div id="winner-card" class="instagram-card" style="display:none; background: #f2efe9;">
+    <div style="position: absolute; top: 100px; left: 50px; font-size: 40px;">✨</div>
+    <div style="position: absolute; bottom: 100px; right: 50px; font-size: 40px;">✨</div>
+    
+    <div style="font-size: 150px; margin-top: 150px;">🏆</div>
+    
+    <div style="font-family: 'Playfair Display', serif; font-size: 40px; color: #333; margin-top: 40px;">CONGRATULATIONS TO</div>
+    
+    <div id="win-name" style="font-family: 'Playfair Display', serif; font-size: 90px; font-weight: 700; color: #333; margin: 40px 0;">User Name</div>
+    
+    <div id="win-time" style="font-family: 'Inter', sans-serif; font-size: 45px; color: #00a8ff; margin-bottom: 60px;">user A Time vs user B time</div>
+    
+    <div style="font-family: 'Inter', sans-serif; font-size: 40px; color: #ff4757; margin-top: 100px;">ucfou.online</div>
 </div>
+
 
     <div id="result" class="glass-card">
         <h2>Your Reality Card</h2>
@@ -395,13 +399,29 @@ currentNickname = nickname;
             resultBox.style.display = "block";
             
             // Players info ko stylish dikhane ke liye
-            document.getElementById("battlePlayers").innerHTML = 
-            `<strong>${window.challengeData.creator}</strong> (${Math.floor(window.challengeData.creatorTime/60)}h ${window.challengeData.creatorTime%60}m) 
-            <span style="color:#ffcc00; margin: 0 10px;">VS</span> 
-            <strong>${nickname}</strong> (${Math.floor(totalMinutes/60)}h ${totalMinutes%60}m)`;
+            // Naye Trophy/Certificate design ke liye logic
+            if(window.challengeData) {
+            // 1. Name aur Time update karein
+            document.getElementById('win-name').innerText = winner;
+            document.getElementById('win-time').innerText = 
+            `${window.challengeData.creator} (${Math.floor(window.challengeData.creatorTime/60)}h ${window.challengeData.creatorTime%60}m) vs ${nickname} (${Math.floor(totalMinutes/60)}h ${totalMinutes%60}m)`;
             
-            // Winner section
-            document.getElementById("battleWinner").innerText = `${winner} WINS! 🎉`;
+            // 2. Naye card ko show karke image generate karein
+            const winCard = document.getElementById('winner-card');
+            winCard.style.display = "flex"; // Element dikhayein
+            
+            const canvas = await html2canvas(winCard, { scale: 1, useCORS: true });
+            const imgData = canvas.toDataURL("image/png");
+            
+            // 3. Result preview mein set karein
+            document.getElementById('generated-image-preview').src = imgData;
+            
+            // 4. Cleanup
+            winCard.style.display = "none"; // Wapas hide kar dein
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('processing').style.display = 'none';
+            }
+            
             
             
             database.ref("challenges/"+window.challengeID).update({
