@@ -19,49 +19,102 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <style>
-    .winner-card{
-    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    .ultra-battle{
+    background:linear-gradient(135deg,#141e30,#243b55);
     color:white;
     padding:25px;
-    border-radius:18px;
+    border-radius:20px;
     margin-bottom:20px;
     text-align:center;
-    box-shadow:0 10px 30px rgba(0,0,0,0.4);
-    animation:pop 0.5s ease;
+    box-shadow:0 12px 40px rgba(0,0,0,0.5);
+    position:relative;
+    overflow:hidden;
+    animation:battlePop .5s ease;
     }
     
-    .winner-title{
+    .battle-title{
     font-size:24px;
     font-weight:700;
-    margin-bottom:10px;
+    margin-bottom:15px;
     }
     
-    .vs-row{
+    .battle-row{
     display:flex;
     justify-content:space-between;
-    margin:8px 0;
+    align-items:center;
+    gap:10px;
+    }
+    
+    .battle-player{
+    flex:1;
+    background:rgba(255,255,255,0.1);
+    padding:15px;
+    border-radius:12px;
+    }
+    
+    .player-name{
+    font-weight:700;
     font-size:18px;
-    padding:8px 12px;
-    background:rgba(255,255,255,0.08);
-    border-radius:10px;
+    }
+    
+    .player-time{
+    font-size:20px;
+    margin-top:5px;
     }
     
     .vs{
-    font-size:20px;
-    margin:10px 0;
-    opacity:0.7;
+    font-size:22px;
+    font-weight:700;
     }
     
-    .winner-name{
+    .winner-tag{
     margin-top:15px;
     font-size:22px;
     font-weight:700;
     color:#FFD700;
+    text-shadow:0 0 12px gold;
     }
     
-    @keyframes pop{
-    from{transform:scale(0.9);opacity:0}
-    to{transform:scale(1);opacity:1}
+    .progress{
+    height:8px;
+    background:rgba(255,255,255,0.2);
+    border-radius:6px;
+    margin-top:15px;
+    overflow:hidden;
+    }
+    
+    .progress-bar{
+    height:100%;
+    background:#FFD700;
+    }
+    
+    .rematch{
+    margin-top:15px;
+    padding:8px 18px;
+    border:none;
+    border-radius:8px;
+    background:#FFD700;
+    font-weight:700;
+    cursor:pointer;
+    }
+    
+    .confetti{
+    position:absolute;
+    width:6px;
+    height:6px;
+    background:#FFD700;
+    top:-10px;
+    animation:fall 2s linear infinite;
+    }
+    
+    @keyframes battlePop{
+    from{opacity:0;transform:scale(.9)}
+    to{opacity:1;transform:scale(1)}
+    }
+    
+    @keyframes fall{
+    0%{transform:translateY(-10px)}
+    100%{transform:translateY(350px)}
     }
         :root {
             --glass-bg: rgba(255, 255, 255, 0.25);
@@ -364,7 +417,8 @@ currentNickname = nickname;
             document.getElementById('generated-image-preview').src = imageDataUrl;
             document.getElementById('processing').style.display = 'none';
             document.getElementById('result').style.display = 'block';
-//card
+
+// ⚔️ VS Battle Result
 if(window.challengeData){
 
 let creatorTime = window.challengeData.creatorTime;
@@ -373,45 +427,65 @@ let winner = currentUserTime > creatorTime
 ? currentNickname
 : window.challengeData.creator;
 
-let creatorH = Math.floor(creatorTime/60);
-let creatorM = creatorTime%60;
+let creatorH=Math.floor(creatorTime/60);
+let creatorM=creatorTime%60;
 
-let userH = Math.floor(currentUserTime/60);
-let userM = currentUserTime%60;
+let userH=Math.floor(currentUserTime/60);
+let userM=currentUserTime%60;
 
-const card = document.createElement("div");
-card.className = "winner-card";
+let total=creatorTime+currentUserTime;
 
-card.innerHTML = `
-<div class="winner-title">⚔️ Screen Time Challenge</div>
+let userPercent=Math.round((currentUserTime/total)*100);
 
-<div class="vs-row">
-<span>${window.challengeData.creator}</span>
-<span>${creatorH}h ${creatorM}m</span>
+const card=document.createElement("div");
+card.className="ultra-battle";
+
+card.innerHTML=`
+<div class="battle-title">⚔️ Screen Time Battle</div>
+
+<div class="battle-row">
+
+<div class="battle-player">
+<div class="player-name">${window.challengeData.creator}</div>
+<div class="player-time">${creatorH}h ${creatorM}m</div>
 </div>
 
 <div class="vs">VS</div>
 
-<div class="vs-row">
-<span>${currentNickname}</span>
-<span>${userH}h ${userM}m</span>
+<div class="battle-player">
+<div class="player-name">${currentNickname}</div>
+<div class="player-time">${userH}h ${userM}m</div>
 </div>
 
-<div class="winner-name">
-🏆 Winner: ${winner}
 </div>
+
+<div class="winner-tag">👑 Winner: ${winner}</div>
+
+<div class="progress">
+<div class="progress-bar" style="width:${userPercent}%"></div>
+</div>
+
+<button class="rematch" onclick="location.reload()">Rematch</button>
 `;
 
 document.getElementById("result").prepend(card);
 
+// Confetti
+for(let i=0;i<30;i++){
+let c=document.createElement("div");
+c.className="confetti";
+c.style.left=Math.random()*100+"%";
+c.style.animationDelay=Math.random()+"s";
+card.appendChild(c);
+}
+
 database.ref("challenges/"+window.challengeID).update({
-opponent: currentNickname,
-opponentTime: currentUserTime,
-winner: winner
+opponent:currentNickname,
+opponentTime:currentUserTime,
+winner:winner
 });
 
 }
-
 
 
             // Setup Download Button
