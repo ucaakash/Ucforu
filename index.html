@@ -184,20 +184,6 @@
         <h2>Analyzing Image...</h2>
         <p style="margin-top:10px; opacity:0.8;">Reading your digital self via AI...</p>
     </div>
-<div id="winner-card" class="instagram-card" style="display:none; background: #f2efe9;">
-    <div style="position: absolute; top: 100px; left: 50px; font-size: 40px;">✨</div>
-    <div style="position: absolute; bottom: 100px; right: 50px; font-size: 40px;">✨</div>
-    
-    <div style="font-size: 150px; margin-top: 150px;">🏆</div>
-    
-    <div style="font-family: 'Playfair Display', serif; font-size: 40px; color: #333; margin-top: 40px;">CONGRATULATIONS TO</div>
-    
-    <div id="win-name" style="font-family: 'Playfair Display', serif; font-size: 90px; font-weight: 700; color: #333; margin: 40px 0;">User Name</div>
-    
-    <div id="win-time" style="font-family: 'Inter', sans-serif; font-size: 45px; color: #00a8ff; margin-bottom: 60px;">user A Time vs user B time</div>
-    
-    <div style="font-family: 'Inter', sans-serif; font-size: 40px; color: #ff4757; margin-top: 100px;">ucfou.online</div>
-</div>
 
 
     <div id="result" class="glass-card">
@@ -231,6 +217,20 @@
 </main>
 
 <div id="card-render-container">
+    <div id="winner-card" class="instagram-card" style="display:none; background: #f2efe9;">
+    <div style="position: absolute; top: 100px; left: 50px; font-size: 40px;">✨</div>
+    <div style="position: absolute; bottom: 100px; right: 50px; font-size: 40px;">✨</div>
+    
+    <div style="font-size: 150px; margin-top: 150px;">🏆</div>
+    
+    <div style="font-family: 'Playfair Display', serif; font-size: 40px; color: #333; margin-top: 40px;">CONGRATULATIONS TO</div>
+    
+    <div id="win-name" style="font-family: 'Playfair Display', serif; font-size: 90px; font-weight: 700; color: #333; margin: 40px 0;">User Name</div>
+    
+    <div id="win-time" style="font-family: 'Inter', sans-serif; font-size: 45px; color: #00a8ff; margin-bottom: 60px;">vs</div>
+    
+    <div style="font-family: 'Inter', sans-serif; font-size: 40px; color: #ff4757; margin-top: 100px;">ucfou.online</div>
+   
     <div id="instagram-card" class="instagram-card">
         <div class="floral-top">🌿</div>
         
@@ -249,7 +249,7 @@
          <br>=	 <div id="viral-card">
     <div id="qrcode-container"></div> 
 </div>
-
+</div>
         <div class="floral-bottom">🌿</div>
     </div>
 </div>
@@ -382,55 +382,36 @@ currentNickname = nickname;
               });
             }
             // Challenge winner check
-            
             if(window.challengeData){
-            
             const creatorTime = window.challengeData.creatorTime;
+            let winner = (totalMinutes > creatorTime) ? nickname : window.challengeData.creator;
             
-            let winner;
-            
-            if(totalMinutes > creatorTime){
-            winner = nickname;
-            }else{
-            winner = window.challengeData.creator;
-            }
-            // ... tumhara pehle wala logic ...
-            const resultBox = document.getElementById("battleResult");
-            resultBox.style.display = "block";
-            
-            // Players info ko stylish dikhane ke liye
-            // Naye Trophy/Certificate design ke liye logic
-            if(window.challengeData) {
-            // 1. Name aur Time update karein
+            // Winner Card update karein
             document.getElementById('win-name').innerText = winner;
             document.getElementById('win-time').innerText = 
-            `${window.challengeData.creator} (${Math.floor(window.challengeData.creatorTime/60)}h ${window.challengeData.creatorTime%60}m) vs ${nickname} (${Math.floor(totalMinutes/60)}h ${totalMinutes%60}m)`;
+            `${window.challengeData.creator} (${Math.floor(creatorTime/60)}h ${creatorTime%60}m) vs ${nickname} (${hours}h ${minutes}m)`;
             
-            // 2. Naye card ko show karke image generate karein
+            // Naye card ko canvas mein render karein
             const winCard = document.getElementById('winner-card');
-            winCard.style.display = "flex"; // Element dikhayein
+            winCard.style.display = "flex"; 
             
             const canvas = await html2canvas(winCard, { scale: 1, useCORS: true });
             const imgData = canvas.toDataURL("image/png");
             
-            // 3. Result preview mein set karein
+            // Result show karein
             document.getElementById('generated-image-preview').src = imgData;
-            
-            // 4. Cleanup
-            winCard.style.display = "none"; // Wapas hide kar dein
-            document.getElementById('result').style.display = 'block';
-            document.getElementById('processing').style.display = 'none';
-            }
-            
-            
+            winCard.style.display = "none"; // Hide kar dein
             
             database.ref("challenges/"+window.challengeID).update({
             opponent: nickname,
             opponentTime: totalMinutes,
             winner: winner
             });
-            
             }
+            
+            
+            
+            
 
         } catch (error) {
             console.error(error);
