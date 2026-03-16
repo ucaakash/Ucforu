@@ -471,7 +471,7 @@ const file = new File([blob], "ChallengeCard.png", {type:"image/png"});
 const shareText =
 `⚔️ Screen Time Challenge
 
-My screen time today: ${currentUserTime} minutes
+My screen time today: ${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m
 
 Can you beat me? 😎
 
