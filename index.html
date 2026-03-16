@@ -545,7 +545,7 @@ function loadLeaderboard() {
     const tbody = document.getElementById('leaderboardBody');
     
     // Yahan 'snap' ka use kiya hai
-    database.ref('leaderboard/' + dailyKey).orderByChild('totalMinutes').limitToLast(50).on('value', (snap) => {
+    database.ref('leaderboard/' + dailyKey).orderByChild('totalMinutes').limitToLast(10).on('value', (snap) => {
         tbody.innerHTML = "";
         
         if (snap.exists()) {
