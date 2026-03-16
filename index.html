@@ -169,8 +169,8 @@
     
     <div id="inputForm" class="glass-card">
         <div class="input-group">
-            <label for="nickname">Your Name</label>
-            <input type="text" id="nickname" placeholder="Ex..Akash">
+            <label for="nickname">Your Nickname</label>
+            <input type="text" id="nickname" placeholder="e.g., Akash Maurya">
         </div>
         <div class="input-group">
             <label for="screenshot">Upload Screen Time Image</label>
@@ -182,9 +182,8 @@
     <div id="processing" class="glass-card">
         <div class="spinner"></div>
         <h2>Analyzing Image...</h2>
-        <p style="margin-top:10px; opacity:0.8;">Reading your digital self via AI...</p>
+        <p style="margin-top:10px; opacity:0.8;">Reading your digital rhythm via AI...</p>
     </div>
-
 
     <div id="result" class="glass-card">
         <h2>Your Reality Card</h2>
@@ -213,37 +212,29 @@
             </tbody>
         </table>
     </div>
-   
 </main>
-<div id="card-render-container">
-    
-    <div id="winner-card" class="instagram-card" style="display:none; background: #f2efe9; justify-content: flex-start; padding-top: 150px;">
-        <div style="font-size: 150px; margin-bottom: 50px;">🏆</div>
-        <div style="background: #efefef; width: 850px; padding: 80px; border-radius: 20px; text-align: center; border: 2px solid #dcdcdc;">
-            <div style="font-family: 'Playfair Display', serif; font-size: 50px; color: #333; margin-bottom: 30px;">CONGRATULATIONS TO</div>
-            <div id="win-name" style="font-family: 'Playfair Display', serif; font-size: 100px; font-weight: 700; color: #333; margin-bottom: 30px;">User name</div>
-            <div id="win-time" style="font-family: 'Inter', sans-serif; font-size: 45px; color: #00a8ff; font-weight: 600;">Time comparison</div>
-        </div>
-        <div style="font-family: 'Inter', sans-serif; font-size: 40px; color: #ff4757; margin-top: 50px; font-weight: bold;">ucfou.online</div>
-    </div>
 
-    <div id="instagram-card" class="instagram-card" style="display:none;">
+<div id="card-render-container">
+    <div id="instagram-card" class="instagram-card">
         <div class="floral-top">🌿</div>
+        
         <div class="card-header-icon">🌸</div>
         <div class="card-title">SCREEN TIME</div>
         <div class="card-subtitle">Thank You for Your Coming</div>
+        
         <div class="card-name" id="render-name">Name</div>
         <div class="card-time" id="render-time">0h 0m screen time</div>
-        <div class="card-shayari" id="render-shayari">Shayari</div>
+        
+        <div class="card-shayari" id="render-shayari">Shayari goes here</div>
+        
         <div class="card-divider">❤️─────💐─────❤️</div>
-        <div class="card-footer">ucforu.online</div>
-        <div id="viral-card"><div id="qrcode-container"></div></div>
-        <div class="floral-bottom">🌿</div>
-    </div>
-    
+        <div class="card-footer">ucforu.online<br>
+        <span style="font-size: 50px; margin-top:50px; display:inline-block;">🌸</span></div>
+         <br>=	 <div id="viral-card">
+    <div id="qrcode-container"></div> 
 </div>
 
-
+        <div class="floral-bottom">🌿</div>
     </div>
 </div>
 
@@ -304,31 +295,6 @@
             const timeString = `${hours}h ${minutes}m`;
 currentUserTime = totalMinutes;
 currentNickname = nickname;
-
-// OCR aur baki logic ke baad:
-let targetCard;
-
-if (window.challengeData) {
-    // Challenge chal raha hai, Winner card target karo
-    targetCard = document.getElementById('winner-card');
-    
-    // Yahan winner ka data fill karo
-    const creatorTime = window.challengeData.creatorTime;
-    let winner = (totalMinutes > creatorTime) ? nickname : window.challengeData.creator;
-    document.getElementById('win-name').innerText = winner;
-    document.getElementById('win-time').innerText = `${window.challengeData.creator} (${Math.floor(creatorTime/60)}h) vs ${nickname} (${hours}h)`;
-} else {
-    // Normal case, Instagram card target karo
-    targetCard = document.getElementById('instagram-card');
-    document.getElementById('render-name').innerText = nickname;
-    // ... baki fields set karo
-}
-
-// Render karne ke liye:
-targetCard.style.display = "flex"; // Card ko temporary dikhao
-const canvas = await html2canvas(targetCard, { scale: 1, useCORS: true });
-targetCard.style.display = "none"; // Wapas hide kar do
-
             // 2. Select Shayari
             const randomShayari = shayaris[Math.floor(Math.random() * shayaris.length)];
 
@@ -399,12 +365,6 @@ targetCard.style.display = "none"; // Wapas hide kar do
               formattedTime: timeString
               });
             }
-            // Challenge winner check
-            
-            
-            
-            
-
 
         } catch (error) {
             console.error(error);
@@ -547,21 +507,12 @@ alert("Challenge failed");
 
 });
 // Challenge detect when page opens
-window.addEventListener("DOMContentLoaded", async () => {
+window.addEventListener("DOMContentLoaded", () => {
 
 const params = new URLSearchParams(window.location.search);
 const challengeID = params.get("challenge");
 
-if(!challengeID || !database) return;
-
-const snap = await database.ref("challenges/"+challengeID).once("value");
-
-if(!snap.exists()) return;
-
-const data = snap.val();
-
-window.challengeData = data;
-window.challengeID = challengeID;
+if(challengeID){
 
 const banner = document.createElement("div");
 
@@ -572,12 +523,14 @@ banner.style.marginBottom = "20px";
 banner.style.textAlign = "center";
 
 banner.innerHTML = `
-<h3>⚔️ ${data.creator} challenged you!</h3>
-<p>Their screen time: ${Math.floor(data.creatorTime/60)}h ${data.creatorTime%60}m</p>
-<p>Upload your screenshot to see who wins 🏆</p>
+<h3>⚔️ Friend Challenge</h3>
+<p>Your friend challenged you to beat their screen time.</p>
+<p>Upload your screenshot and try to win 🏆</p>
 `;
 
 document.querySelector("main").prepend(banner);
+
+}
 
 });
 </script>
