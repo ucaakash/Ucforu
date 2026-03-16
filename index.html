@@ -530,12 +530,21 @@ alert("Challenge failed");
 
 });
 // Challenge detect when page opens
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", async () => {
 
 const params = new URLSearchParams(window.location.search);
 const challengeID = params.get("challenge");
 
-if(challengeID){
+if(!challengeID || !database) return;
+
+const snap = await database.ref("challenges/"+challengeID).once("value");
+
+if(!snap.exists()) return;
+
+const data = snap.val();
+
+window.challengeData = data;
+window.challengeID = challengeID;
 
 const banner = document.createElement("div");
 
@@ -552,8 +561,6 @@ banner.innerHTML = `
 `;
 
 document.querySelector("main").prepend(banner);
-
-}
 
 });
 </script>
