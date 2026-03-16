@@ -19,21 +19,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <style>
-    .share-btn{
-    margin-top:12px;
-    padding:10px 18px;
-    border:none;
-    border-radius:8px;
-    background:#ff4081;
-    color:white;
-    font-weight:600;
-    cursor:pointer;
-    font-family:'Playfair Display',serif;
-    }
-    
-    .share-btn:hover{
-    background:#e73370;
-    }
     .flower-battle{
 background:white;
 color:#333;
@@ -260,7 +245,7 @@ to{opacity:1;transform:scale(1)}
 <main style="width: 100%; display: flex; flex-direction: column; align-items: center;">
     
     <div id="inputForm" class="glass-card">
-        <div class="input-group">
+            <div class="input-group">
             <label for="nickname">Your Name</label>
             <input type="text" id="nickname" placeholder="Ex..Akash">
         </div>
@@ -276,7 +261,7 @@ to{opacity:1;transform:scale(1)}
         <h2>Analyzing Image...</h2>
         <p style="margin-top:10px; opacity:0.8;">Reading your digital self via AI...</p>
     </div>
-<button id="shareBattleBtn" class="share-btn">📸 Share Battle Result</button>
+
     <div id="result" class="glass-card">
         <h2>Your Card</h2>
         <p style="margin-bottom: 20px; font-size: 0.9rem;">Long press image to save, or use button below.</p>
@@ -288,7 +273,8 @@ to{opacity:1;transform:scale(1)}
       <button id="challengeBtn" class="secondary" style="background: rgba(255,255,255,0.2); color: white;">Challenge Friends ⚔️</button>  
         <button onclick="location.reload()" style="background:none; border:none; color:white; margin-top:10px; text-decoration: underline;">Create Another</button>
     </div>
-
+<h3 style="margin-top:30px;">📜 Battle History</h3>
+<div id="battleHistory"></div>
     <div id="leaderboard" class="glass-card">
         <h2 style="text-align: center;">🏆 Leaderbord (Today)</h2>
         <table class="leaderboard-table">
@@ -485,36 +471,16 @@ winner:winner
 });
 
 }
-
-//button
-document.getElementById("shareBattleBtn").onclick = async () => {
-
-const battleCard = document.querySelector(".flower-battle");
-
-const canvas = await html2canvas(battleCard);
-
-canvas.toBlob(async (blob)=>{
-
-const file = new File([blob],"BattleResult.png",{type:"image/png"});
-
-if(navigator.canShare && navigator.canShare({files:[file]})){
-
-await navigator.share({
-files:[file],
-title:"Screen Time Battle",
-text:"Check our screen time battle!",
-url:"https://ucforu.online"
+//history
+database.ref("battleHistory").push({
+creator: window.challengeData.creator,
+opponent: currentNickname,
+creatorTime: creatorTime,
+opponentTime: currentUserTime,
+winner: winner,
+time: Date.now()
 });
 
-}else{
-
-alert("Sharing not supported on this device");
-
-}
-
-});
-
-};
             // Setup Download Button
             const downloadBtn = document.getElementById('downloadBtn');
             downloadBtn.onclick = () => {
