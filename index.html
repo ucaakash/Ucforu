@@ -506,6 +506,33 @@ alert("Challenge failed");
 });
 
 });
+// Challenge detect when page opens
+window.addEventListener("DOMContentLoaded", () => {
+
+const params = new URLSearchParams(window.location.search);
+const challengeID = params.get("challenge");
+
+if(challengeID){
+
+const banner = document.createElement("div");
+
+banner.style.background = "rgba(0,0,0,0.3)";
+banner.style.padding = "15px";
+banner.style.borderRadius = "12px";
+banner.style.marginBottom = "20px";
+banner.style.textAlign = "center";
+
+banner.innerHTML = `
+<h3>⚔️ Friend Challenge</h3>
+<p>Your friend challenged you to beat their screen time.</p>
+<p>Upload your screenshot and try to win 🏆</p>
+`;
+
+document.querySelector("main").prepend(banner);
+
+}
+
+});
 </script>
 
 </body>
