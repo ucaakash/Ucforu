@@ -212,6 +212,15 @@
             </tbody>
         </table>
     </div>
+    <div id="battleResult" style="display:none; margin-top:20px; padding:20px; border-radius:15px; background:#ffffff; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.1);">
+    
+    <h2 style="margin-bottom:10px;">⚔️ Screen Time Battle</h2>
+    
+    <p id="battlePlayers" style="font-size:18px;"></p>
+    
+    <h3 id="battleWinner" style="margin-top:10px; color:#e63946;"></h3>
+    
+    </div>
 </main>
 
 <div id="card-render-container">
@@ -379,7 +388,15 @@ currentNickname = nickname;
             winner = window.challengeData.creator;
             }
             
-            alert("🏆 Winner: " + winner);
+            const resultBox = document.getElementById("battleResult");
+            
+            resultBox.style.display = "block";
+            
+            document.getElementById("battlePlayers").innerText =
+            `${window.challengeData.creator} ${Math.floor(window.challengeData.creatorTime/60)}h ${window.challengeData.creatorTime%60}m  vs  ${nickname} ${Math.floor(totalMinutes/60)}h ${totalMinutes%60}m`;
+            
+            document.getElementById("battleWinner").innerText =
+            `🏆 Winner ${winner}`;
             
             database.ref("challenges/"+window.challengeID).update({
             opponent: nickname,
