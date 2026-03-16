@@ -184,43 +184,18 @@
         <h2>Analyzing Image...</h2>
         <p style="margin-top:10px; opacity:0.8;">Reading your digital self via AI...</p>
     </div>
-<div id="battleResult" style="display:none; margin-top:25px;">
-
-<div style="
-background:linear-gradient(135deg,#6a11cb,#2575fc);
-padding:25px;
-border-radius:18px;
-color:white;
-text-align:center;
-box-shadow:0 15px 40px rgba(0,0,0,0.2);
-">
-
-<h2 style="margin-bottom:15px;font-size:24px;">
-⚔️ Screen Time Battle
-</h2>
-
-<div id="battlePlayers" style="
-font-size:18px;
-margin-bottom:15px;
-opacity:0.9;
-"></div>
-
-<div id="battleWinner" style="
-font-size:28px;
-font-weight:700;
-background:white;
-color:#333;
-padding:10px;
-border-radius:12px;
-display:inline-block;
-">
-</div>
-
-</div>
-
-</div>
-    
+<div id="battleResult" style="display:none; margin: 25px auto; width: 90%; max-width: 500px;">
+    <div style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 30px; border-radius: 25px; color: white; text-align: center; border: 3px solid #ffcc00; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        
+        <div style="font-size: 40px; margin-bottom: 10px;">🏆</div>
+        <h2 style="font-family: 'Playfair Display', serif; font-size: 26px; margin-bottom: 15px; letter-spacing: 1px;">VICTORY DECLARED!</h2>
+        
+        <div id="battlePlayers" style="font-size: 16px; opacity: 0.9; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px;"></div>
+        
+        <div id="battleWinner" style="font-size: 24px; font-weight: 800; color: #ffcc00; text-transform: uppercase; text-shadow: 0 0 10px rgba(255,204,0,0.5);"></div>
     </div>
+</div>
+
     <div id="result" class="glass-card">
         <h2>Your Reality Card</h2>
         <p style="margin-bottom: 20px; font-size: 0.9rem;">Long press image to save, or use button below.</p>
@@ -415,16 +390,19 @@ currentNickname = nickname;
             }else{
             winner = window.challengeData.creator;
             }
-            
+            // ... tumhara pehle wala logic ...
             const resultBox = document.getElementById("battleResult");
-            
             resultBox.style.display = "block";
             
-            document.getElementById("battlePlayers").innerText =
-            `${window.challengeData.creator} ${Math.floor(window.challengeData.creatorTime/60)}h ${window.challengeData.creatorTime%60}m  vs  ${nickname} ${Math.floor(totalMinutes/60)}h ${totalMinutes%60}m`;
+            // Players info ko stylish dikhane ke liye
+            document.getElementById("battlePlayers").innerHTML = 
+            `<strong>${window.challengeData.creator}</strong> (${Math.floor(window.challengeData.creatorTime/60)}h ${window.challengeData.creatorTime%60}m) 
+            <span style="color:#ffcc00; margin: 0 10px;">VS</span> 
+            <strong>${nickname}</strong> (${Math.floor(totalMinutes/60)}h ${totalMinutes%60}m)`;
             
-            document.getElementById("battleWinner").innerText =
-            `🏆 Winner ${winner}`;
+            // Winner section
+            document.getElementById("battleWinner").innerText = `${winner} WINS! 🎉`;
+            
             
             database.ref("challenges/"+window.challengeID).update({
             opponent: nickname,
