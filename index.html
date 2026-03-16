@@ -245,7 +245,7 @@ to{opacity:1;transform:scale(1)}
 <main style="width: 100%; display: flex; flex-direction: column; align-items: center;">
     
     <div id="inputForm" class="glass-card">
-            <div class="input-group">
+        <div class="input-group">
             <label for="nickname">Your Name</label>
             <input type="text" id="nickname" placeholder="Ex..Akash">
         </div>
@@ -273,8 +273,7 @@ to{opacity:1;transform:scale(1)}
       <button id="challengeBtn" class="secondary" style="background: rgba(255,255,255,0.2); color: white;">Challenge Friends ⚔️</button>  
         <button onclick="location.reload()" style="background:none; border:none; color:white; margin-top:10px; text-decoration: underline;">Create Another</button>
     </div>
-<h3 style="margin-top:30px;">📜 Battle History</h3>
-<div id="battleHistory"></div>
+
     <div id="leaderboard" class="glass-card">
         <h2 style="text-align: center;">🏆 Leaderbord (Today)</h2>
         <table class="leaderboard-table">
@@ -471,15 +470,7 @@ winner:winner
 });
 
 }
-//history
-database.ref("battleHistory").push({
-creator: window.challengeData.creator,
-opponent: currentNickname,
-creatorTime: creatorTime,
-opponentTime: currentUserTime,
-winner: winner,
-time: Date.now()
-});
+
 
             // Setup Download Button
             const downloadBtn = document.getElementById('downloadBtn');
