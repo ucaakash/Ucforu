@@ -19,6 +19,50 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <style>
+    .winner-card{
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:white;
+    padding:25px;
+    border-radius:18px;
+    margin-bottom:20px;
+    text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    animation:pop 0.5s ease;
+    }
+    
+    .winner-title{
+    font-size:24px;
+    font-weight:700;
+    margin-bottom:10px;
+    }
+    
+    .vs-row{
+    display:flex;
+    justify-content:space-between;
+    margin:8px 0;
+    font-size:18px;
+    padding:8px 12px;
+    background:rgba(255,255,255,0.08);
+    border-radius:10px;
+    }
+    
+    .vs{
+    font-size:20px;
+    margin:10px 0;
+    opacity:0.7;
+    }
+    
+    .winner-name{
+    margin-top:15px;
+    font-size:22px;
+    font-weight:700;
+    color:#FFD700;
+    }
+    
+    @keyframes pop{
+    from{transform:scale(0.9);opacity:0}
+    to{transform:scale(1);opacity:1}
+    }
         :root {
             --glass-bg: rgba(255, 255, 255, 0.25);
             --glass-border: rgba(255, 255, 255, 0.4);
@@ -320,8 +364,7 @@ currentNickname = nickname;
             document.getElementById('generated-image-preview').src = imageDataUrl;
             document.getElementById('processing').style.display = 'none';
             document.getElementById('result').style.display = 'block';
-
-// ⚔️ VS Battle Result
+//card
 if(window.challengeData){
 
 let creatorTime = window.challengeData.creatorTime;
@@ -330,43 +373,47 @@ let winner = currentUserTime > creatorTime
 ? currentNickname
 : window.challengeData.creator;
 
-const resultBox = document.createElement("div");
+let creatorH = Math.floor(creatorTime/60);
+let creatorM = creatorTime%60;
 
-resultBox.style.background = "linear-gradient(135deg,#ff416c,#ff4b2b)";
-resultBox.style.padding = "25px";
-resultBox.style.borderRadius = "20px";
-resultBox.style.marginBottom = "20px";
-resultBox.style.color = "white";
-resultBox.style.textAlign = "center";
-resultBox.style.boxShadow = "0 10px 30px rgba(0,0,0,0.3)";
+let userH = Math.floor(currentUserTime/60);
+let userM = currentUserTime%60;
 
-resultBox.innerHTML = `
-<h2 style="margin-bottom:15px;">⚔️ Screen Time Battle</h2>
+const card = document.createElement("div");
+card.className = "winner-card";
 
-<div style="display:flex;justify-content:space-between;align-items:center;font-size:18px;margin-bottom:15px;">
+card.innerHTML = `
+<div class="winner-title">⚔️ Screen Time Challenge</div>
 
-<div style="flex:1">
-<strong>${window.challengeData.creator}</strong><br>
-${Math.floor(creatorTime/60)}h ${creatorTime%60}m
+<div class="vs-row">
+<span>${window.challengeData.creator}</span>
+<span>${creatorH}h ${creatorM}m</span>
 </div>
 
-<div style="font-size:28px;padding:0 10px;">VS</div>
+<div class="vs">VS</div>
 
-<div style="flex:1">
-<strong>${currentNickname}</strong><br>
-${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m
+<div class="vs-row">
+<span>${currentNickname}</span>
+<span>${userH}h ${userM}m</span>
 </div>
 
-</div>
-
-<div style="font-size:22px;font-weight:700;background:white;color:#333;padding:10px;border-radius:12px;display:inline-block;">
+<div class="winner-name">
 🏆 Winner: ${winner}
 </div>
 `;
 
-document.getElementById("result").prepend(resultBox);
+document.getElementById("result").prepend(card);
+
+database.ref("challenges/"+window.challengeID).update({
+opponent: currentNickname,
+opponentTime: currentUserTime,
+winner: winner
+});
 
 }
+
+
+
             // Setup Download Button
             const downloadBtn = document.getElementById('downloadBtn');
             downloadBtn.onclick = () => {
