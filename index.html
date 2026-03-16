@@ -215,7 +215,6 @@
     </div>
    
 </main>
-
 <div id="card-render-container">
     
     <div id="winner-card" class="instagram-card" style="display:none; background: #f2efe9; justify-content: flex-start; padding-top: 150px;">
@@ -243,6 +242,7 @@
     </div>
     
 </div>
+
 
     </div>
 </div>
@@ -304,6 +304,31 @@
             const timeString = `${hours}h ${minutes}m`;
 currentUserTime = totalMinutes;
 currentNickname = nickname;
+
+// OCR aur baki logic ke baad:
+let targetCard;
+
+if (window.challengeData) {
+    // Challenge chal raha hai, Winner card target karo
+    targetCard = document.getElementById('winner-card');
+    
+    // Yahan winner ka data fill karo
+    const creatorTime = window.challengeData.creatorTime;
+    let winner = (totalMinutes > creatorTime) ? nickname : window.challengeData.creator;
+    document.getElementById('win-name').innerText = winner;
+    document.getElementById('win-time').innerText = `${window.challengeData.creator} (${Math.floor(creatorTime/60)}h) vs ${nickname} (${hours}h)`;
+} else {
+    // Normal case, Instagram card target karo
+    targetCard = document.getElementById('instagram-card');
+    document.getElementById('render-name').innerText = nickname;
+    // ... baki fields set karo
+}
+
+// Render karne ke liye:
+targetCard.style.display = "flex"; // Card ko temporary dikhao
+const canvas = await html2canvas(targetCard, { scale: 1, useCORS: true });
+targetCard.style.display = "none"; // Wapas hide kar do
+
             // 2. Select Shayari
             const randomShayari = shayaris[Math.floor(Math.random() * shayaris.length)];
 
@@ -375,29 +400,6 @@ currentNickname = nickname;
               });
             }
             // Challenge winner check
-            // OCR aur baki logic ke baad:
-            let targetCard;
-            
-            if (window.challengeData) {
-            // Challenge chal raha hai, Winner card target karo
-            targetCard = document.getElementById('winner-card');
-            
-            // Yahan winner ka data fill karo
-            const creatorTime = window.challengeData.creatorTime;
-            let winner = (totalMinutes > creatorTime) ? nickname : window.challengeData.creator;
-            document.getElementById('win-name').innerText = winner;
-            document.getElementById('win-time').innerText = `${window.challengeData.creator} (${Math.floor(creatorTime/60)}h) vs ${nickname} (${hours}h)`;
-            } else {
-            // Normal case, Instagram card target karo
-            targetCard = document.getElementById('instagram-card');
-            document.getElementById('render-name').innerText = nickname;
-            // ... baki fields set karo
-            }
-            
-            // Render karne ke liye:
-            targetCard.style.display = "flex"; // Card ko temporary dikhao
-            const canvas = await html2canvas(targetCard, { scale: 1, useCORS: true });
-            targetCard.style.display = "none"; // Wapas hide kar do
             
             
             
