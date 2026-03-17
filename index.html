@@ -406,9 +406,11 @@ Uc.Akash
     document.getElementById('analyzeBtn').addEventListener('click', async () => {
         const nickname = document.getElementById('nickname').value.trim();
         const file = document.getElementById('screenshot').files[0];
-
-        if (!nickname) return alert("Please enter your nickname.");
-        if (!file) {
+if (!nickname) {
+    showToast("Enter your name first!", "error");
+    return;
+}
+         if (!file) {
         showToast("Please upload screenshot!", "error");
         return;
         }
