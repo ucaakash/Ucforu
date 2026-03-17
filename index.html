@@ -19,6 +19,48 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <style>
+    /* Container */
+    #toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    }
+    
+    /* Toast */
+    .toast {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 260px;
+    margin-bottom: 10px;
+    padding: 14px 18px;
+    border-radius: 14px;
+    color: #fff;
+    font-size: 14px;
+    backdrop-filter: blur(12px);
+    background: rgba(0,0,0,0.6);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    transform: translateX(120%);
+    opacity: 0;
+    transition: all 0.4s ease;
+    }
+    
+    /* Show */
+    .toast.show {
+    transform: translateX(0);
+    opacity: 1;
+    }
+    
+    /* Types */
+    .toast.success { background: rgba(46, 204, 113, 0.9); }
+    .toast.error   { background: rgba(231, 76, 60, 0.9); }
+    .toast.info    { background: rgba(52, 152, 219, 0.9); }
+    
+    /* Icon */
+    .toast-icon {
+    font-size: 18px;
+    }
     .flower-battle{
 background:white;
 color:#333;
@@ -241,7 +283,7 @@ to{opacity:1;transform:scale(1)}
     <h1>UCforu</h1>
     <p>Create & Share Your Digital </p>
 </header>
-
+<div id="toast-container"></div>
 <main style="width: 100%; display: flex; flex-direction: column; align-items: center;">
     
     <div id="inputForm" class="glass-card">
@@ -366,8 +408,10 @@ Uc.Akash
         const file = document.getElementById('screenshot').files[0];
 
         if (!nickname) return alert("Please enter your nickname.");
-        if (!file) return alert("Please upload a screenshot.");
-
+        if (!file) {
+        showToast("Please upload screenshot!", "error");
+        return;
+        }
         document.getElementById('inputForm').style.display = 'none';
         document.getElementById('processing').style.display = 'block';
 
@@ -708,6 +752,37 @@ banner.innerHTML = `
 }
 
 });
+function showToast(message, type = "info") {
+
+    const container = document.getElementById("toast-container");
+
+    const toast = document.createElement("div");
+    toast.className = "toast " + type;
+
+    let icon = "ℹ️";
+    if(type === "success") icon = "✅";
+    if(type === "error") icon = "❌";
+
+    toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div>${message}</div>
+    `;
+
+    container.appendChild(toast);
+
+    // show animation
+    setTimeout(() => {
+        toast.classList.add("show");
+    }, 100);
+
+    // auto remove
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => {
+            toast.remove();
+        }, 400);
+    }, 3000);
+}
 </script>
 
 </body>
