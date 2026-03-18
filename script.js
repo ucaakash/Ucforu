@@ -1,3 +1,9 @@
+document.addEventListener("DOMContentLoaded", () => {
+
+   // 🔥 FULL tumhara JS code yaha daalo
+
+});
+
 const shayaris = [ 
      "Phone ki duniya mein aise dil lagaya, battery 100 se 0 kab aayi, pata hi nahi chala!", 
      "Itna scroll kar liya ki ab sapno mein bhi Reels chal rahi hain.", 
