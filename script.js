@@ -381,3 +381,53 @@ window.onclick = (event) => {
         guideModal.style.display = "none";
     }
 };
+
+// --- Isse script.js ke ekdum last mein paste karein ---
+
+window.addEventListener("DOMContentLoaded", () => {
+    const guideModal = document.getElementById('guideModal');
+    const params = new URLSearchParams(window.location.search);
+    const challengeID = params.get("challenge");
+
+    // 1. Automatic Popup Logic
+    // Agar koi challenge link se aaya hai (URL mein ?challenge=... hai)
+    // YA fir user pehli baar site par aaya hai
+    if (challengeID || !localStorage.getItem('guideShown')) {
+        setTimeout(() => {
+            if(guideModal) {
+                guideModal.style.display = 'flex';
+                
+                // Agar tum chahte ho ki sirf ek baar dikhe, toh niche wali line se comment hata dena
+                // localStorage.setItem('guideShown', 'true'); 
+            }
+        }, 1200); // 1.2 seconds baad popup aayega
+    }
+
+    // 2. Challenge Title Change (Agar link se aaya hai)
+    if(challengeID) {
+        const guideTitle = document.querySelector("#guideModal h2");
+        if(guideTitle) guideTitle.innerHTML = "Accept Challenge! ⚔️";
+    }
+
+    // 3. Tab & Close Logic (Jo pehle diya tha)
+    const tabAndroid = document.getElementById('tabAndroid');
+    const tabIphone = document.getElementById('tabIphone');
+    const contentAndroid = document.getElementById('contentAndroid');
+    const contentIphone = document.getElementById('contentIphone');
+
+    if(tabAndroid && tabIphone) {
+        tabAndroid.onclick = () => {
+            contentAndroid.style.display = 'block';
+            contentIphone.style.display = 'none';
+            tabAndroid.className = 'primary';
+            tabIphone.className = 'secondary';
+        };
+
+        tabIphone.onclick = () => {
+            contentAndroid.style.display = 'none';
+            contentIphone.style.display = 'block';
+            tabAndroid.className = 'secondary';
+            tabIphone.className = 'primary';
+        };
+    }
+});
