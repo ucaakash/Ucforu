@@ -1,111 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UCforU - Viral Screen Time Card</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UCforU - Viral Screen Time Card</title>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <header>
-    <h1>UCforu</h1>
-    <p>Create & Share Your Digital </p>
+<h1>UCforu</h1>
+<p>Create & Share Your Digital</p>
 </header>
+
 <div id="toast-container"></div>
-<main style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-    
-    <div id="inputForm" class="glass-card">
-        <div class="input-group">
-            <label for="nickname">Your Name</label>
-            <input type="text" id="nickname" placeholder="Ex..Akash">
-        </div>
-        <div class="input-group">
-            <label for="screenshot">Upload Screen Time Image</label>
-            <input type="file" id="screenshot" accept="image/png, image/jpeg, image/webp">
-        </div>
-        <button id="analyzeBtn" class="primary">Reveal My Digital Self✨</button>
-    </div>
 
-    <div id="processing" class="glass-card">
-        <div class="spinner"></div>
-        <h2>Analyzing Image...</h2>
-        <p style="margin-top:10px; opacity:0.8;">Reading your digital self via AI...</p>
-    </div>
+<main style="width:100%;display:flex;flex-direction:column;align-items:center;">
 
-    <div id="result" class="glass-card">
-        <h2>Your Card</h2>
-        <p style="margin-bottom: 20px; font-size: 0.9rem;">Long press image to save, or use button below.</p>
-        
-        <img id="generated-image-preview" src="" alt="Your Screen Time Card">
+<!-- INPUT -->
+<div id="inputForm" class="glass-card">
+<label>Your Name</label>
+<input type="text" id="nickname" placeholder="Ex..Akash">
 
-        <button id="downloadBtn" class="primary">Download Card ⬇️</button>
-        <button id="shareBtn" class="secondary" style="background: rgba(255,255,255,0.2); color: white;">Share Link 🔗</button>
-      <button id="challengeBtn" class="secondary" style="background: rgba(255,255,255,0.2); color: white;">Challenge Friends ⚔️</button>  
-        <button onclick="location.reload()" style="background:none; border:none; color:white; margin-top:10px; text-decoration: underline;">Create Another</button>
-    </div>
+<label>Upload Screenshot</label>
+<input type="file" id="screenshot">
 
-    <div id="leaderboard" class="glass-card">
-        <h2 style="text-align: center;">🏆 Leaderbord (Today)</h2>
-        <table class="leaderboard-table">
-            <thead>
-                <tr>
-                    <th class="rank">#</th>
-                    <th>Name</th>
-                    <th class="time">Time</th>
-                </tr>
-            </thead>
-            <tbody id="leaderboardBody">
-                <tr><td colspan="3" style="text-align:center;">Loading...</td></tr>
-            </tbody>
-        </table>
-    </div>
-<div class="credit">
-Design by ❤️ 
-<a href="https://www.instagram.com/uc.akash?igsh=MXRqc2NpaDJ4dHY4dA==" target="_blank">
-Uc.Akash
-</a> ❤️
+<button id="analyzeBtn" class="primary">Reveal My Digital Self ✨</button>
 </div>
+
+<!-- LOADING -->
+<div id="processing" class="glass-card" style="display:none;">
+<div class="spinner"></div>
+<h2>Analyzing...</h2>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="glass-card" style="display:none;">
+<h2>Your Card</h2>
+
+<img id="generated-image-preview">
+
+<button id="downloadBtn" class="primary">Download ⬇️</button>
+<button id="shareBtn" class="secondary">Share Card 📤</button>
+<button id="challengeBtn" class="secondary">Challenge ⚔️</button>
+
+<button onclick="location.reload()">Reset</button>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="glass-card">
+<h2>🏆 Leaderboard</h2>
+<table class="leaderboard-table">
+<tbody id="leaderboardBody">
+<tr><td>Loading...</td></tr>
+</tbody>
+</table>
+</div>
+
 </main>
 
-<div id="card-render-container">
-    <div id="instagram-card" class="instagram-card">
-        <div class="floral-top">🌿</div>
-        
-        <div class="card-header-icon">🌸</div>
-        <div class="card-title">SCREEN TIME</div>
-        <div class="card-subtitle">Thank You for Your Coming</div>
-        
-        <div class="card-name" id="render-name">Name</div>
-        <div class="card-time" id="render-time">0h 0m screen time</div>
-        
-        <div class="card-shayari" id="render-shayari">Shayari goes here</div>
-        
-        <div class="card-divider">❤️─────💐─────❤️</div>
-        <div class="card-footer">ucforu.online<br>
-        <span style="font-size: 50px; margin-top:50px; display:inline-block;">🌸</span></div>
-         <br>=	 <div id="viral-card">
-    <div id="qrcode-container"></div> 
-</div>
+<!-- HIDDEN CARD -->
+<div id="card-render-container" style="position:absolute;left:-9999px;">
+<div id="instagram-card">
 
-        <div class="floral-bottom">🌿</div>
-    </div>
+<div id="render-name">Name</div>
+<div id="render-time">0h</div>
+<div id="render-shayari">...</div>
+
+<div id="qrcode-container"></div>
+
+</div>
 </div>
 
 <script src="script.js" defer></script>
+
 </body>
 </html>
