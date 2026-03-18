@@ -342,3 +342,42 @@ function showToast(message, type = "info") {
         }, 400);
     }, 3000);
 }
+
+// Guide Modal Logic
+const guideBtn = document.getElementById('guideBtn');
+const guideModal = document.getElementById('guideModal');
+const closeGuide = document.getElementById('closeGuide');
+const tabAndroid = document.getElementById('tabAndroid');
+const tabIphone = document.getElementById('tabIphone');
+const contentAndroid = document.getElementById('contentAndroid');
+const contentIphone = document.getElementById('contentIphone');
+
+if(guideBtn) {
+    guideBtn.onclick = () => guideModal.style.display = 'flex';
+}
+
+if(closeGuide) {
+    closeGuide.onclick = () => guideModal.style.display = 'none';
+}
+
+// Tab Switching
+tabAndroid.onclick = () => {
+    contentAndroid.style.display = 'block';
+    contentIphone.style.display = 'none';
+    tabAndroid.className = 'primary';
+    tabIphone.className = 'secondary';
+};
+
+tabIphone.onclick = () => {
+    contentAndroid.style.display = 'none';
+    contentIphone.style.display = 'block';
+    tabAndroid.className = 'secondary';
+    tabIphone.className = 'primary';
+};
+
+// Background click se band karne ke liye
+window.onclick = (event) => {
+    if (event.target == guideModal) {
+        guideModal.style.display = "none";
+    }
+};
