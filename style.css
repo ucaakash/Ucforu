@@ -1,261 +1,210 @@
-/* Container */
- #toast-container {
- position: fixed;
- top: 20px;
- right: 20px;
- z-index: 9999;
- }
- 
- /* Toast */
- .toast {
- display: flex;
- align-items: center;
- gap: 12px;
- min-width: 260px;
- margin-bottom: 10px;
- padding: 14px 18px;
- border-radius: 14px;
- color: #fff;
- font-size: 14px;
- backdrop-filter: blur(12px);
- background: rgba(0,0,0,0.6);
- box-shadow: 0 10px 25px rgba(0,0,0,0.3);
- transform: translateX(120%);
- opacity: 0;
- transition: all 0.4s ease;
- }
- 
- /* Show */
- .toast.show {
- transform: translateX(0);
- opacity: 1;
- }
- 
- /* Types */
- .toast.success { background: rgba(46, 204, 113, 0.9); }
- .toast.error   { background: rgba(231, 76, 60, 0.9); }
- .toast.info    { background: rgba(52, 152, 219, 0.9); }
- 
- /* Icon */
- .toast-icon {
- font-size: 18px;
- }
- .flower-battle{
-background:white;
-color:#333;
-padding:25px;
-border-radius:18px;
-margin-bottom:20px;
-text-align:center;
-box-shadow:0 10px 35px rgba(0,0,0,0.15);
-position:relative;
-overflow:hidden;
-animation:cardPop .5s ease;
-font-family:'Playfair Display',serif;
+/* RESET */
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
 }
 
-.battle-title{
-font-size:26px;
-font-weight:700;
-margin-bottom:15px;
+body {
+font-family: 'Inter', sans-serif;
+background: linear-gradient(135deg, #667eea, #764ba2);
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 20px;
+color: white;
 }
 
-.battle-row{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:10px;
+/* HEADER */
+header {
+text-align: center;
+margin-bottom: 20px;
 }
 
-.player-box{
-flex:1;
-background:#f7f7f7;
-padding:15px;
-border-radius:12px;
+header h1 {
+font-family: 'Playfair Display', serif;
+font-size: 3rem;
 }
 
-.player-name{
-font-size:18px;
-font-weight:700;
+header p {
+opacity: 0.8;
 }
 
-.player-time{
-font-size:20px;
-margin-top:5px;
+/* GLASS CARD */
+.glass-card {
+background: rgba(255,255,255,0.15);
+backdrop-filter: blur(12px);
+border-radius: 20px;
+padding: 20px;
+width: 100%;
+max-width: 500px;
+margin-bottom: 20px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
-.vs{
-font-size:22px;
-font-weight:700;
+/* INPUT */
+input {
+width: 100%;
+padding: 12px;
+margin-bottom: 15px;
+border-radius: 10px;
+border: none;
 }
 
-.winner-text{
-margin-top:15px;
-font-size:22px;
-font-weight:700;
-color:#ff4081;
+/* BUTTON */
+button {
+width: 100%;
+padding: 14px;
+border: none;
+border-radius: 14px;
+font-size: 16px;
+font-weight: 600;
+cursor: pointer;
+margin-bottom: 12px;
+transition: 0.3s;
 }
 
-.flower{
-position:absolute;
-top:-20px;
-font-size:20px;
-animation:flowerFall linear infinite;
-opacity:.9;
+button.primary {
+background: linear-gradient(45deg, #ff416c, #ff4b2b);
+color: white;
 }
 
-@keyframes flowerFall{
-0%{
-transform:translateY(-20px) rotate(0deg);
-}
-100%{
-transform:translateY(350px) rotate(360deg);
-}
+button.secondary {
+background: rgba(255,255,255,0.9);
+color: black;
 }
 
-@keyframes cardPop{
-from{opacity:0;transform:scale(.9)}
-to{opacity:1;transform:scale(1)}
+button:hover {
+transform: translateY(-2px);
+box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
-     :root {
-         --glass-bg: rgba(255, 255, 255, 0.25);
-         --glass-border: rgba(255, 255, 255, 0.4);
-         --text-main: #ffffff;
-         --text-dark: #2d3436;
-         --accent-color: #ff4757;
-     }
 
-     * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+/* RESULT IMAGE */
+#generated-image-preview {
+width: 100%;
+border-radius: 15px;
+margin-bottom: 15px;
+}
 
-     /* Animated Colorful Background */
-     body {
-         font-family: 'Inter', sans-serif;
-         background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-         background-size: 400% 400%;
-         animation: gradientBG 15s ease infinite;
-         color: var(--text-main);
-         display: flex;
-         flex-direction: column;
-         align-items: center;
-         min-height: 100vh;
-         padding: 20px;
-         overflow-x: hidden;
-     }
+/* 👑 WINNER CARD */
+.winner-card {
+background: white;
+color: black;
+border-radius: 18px;
+padding: 20px;
+text-align: center;
+margin-bottom: 15px;
+font-family: 'Playfair Display', serif;
+position: relative;
+overflow: hidden;
+animation: pop 0.4s ease;
+}
 
-     @keyframes gradientBG {
-         0% { background-position: 0% 50%; }
-         50% { background-position: 100% 50%; }
-         100% { background-position: 0% 50%; }
-     }
+.winner-card::after {
+content: "👑";
+position: absolute;
+top: -10px;
+right: 10px;
+font-size: 40px;
+opacity: 0.2;
+}
 
-     h1, h2, h3 { font-family: 'Playfair Display', serif; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+.winner-text {
+font-size: 20px;
+font-weight: bold;
+}
 
-     /* Glassmorphism Containers */
-     .glass-card {
-         background: var(--glass-bg);
-         backdrop-filter: blur(16px);
-         -webkit-backdrop-filter: blur(16px);
-         border: 1px solid var(--glass-border);
-         border-radius: 24px;
-         padding: 30px;
-         width: 100%;
-         max-width: 500px;
-         margin-bottom: 30px;
-         box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-     }
+.winner-name {
+color: #ff4081;
+}
 
-     header { text-align: center; margin-bottom: 20px; }
-     header h1 { font-size: 3.5rem; letter-spacing: 2px; }
-     header p { font-size: 1.1rem; opacity: 0.9; margin-top: 5px; }
+/* ⚔️ CHALLENGE BANNER */
+.challenge-banner {
+background: rgba(255,255,255,0.2);
+padding: 15px;
+border-radius: 15px;
+text-align: center;
+margin-bottom: 15px;
+font-family: 'Playfair Display', serif;
+}
 
-     .input-group { margin-bottom: 20px; text-align: left; }
-     label { display: block; margin-bottom: 8px; font-weight: 500; }
-     
-     input[type="text"], input[type="file"] {
-         width: 100%; padding: 15px; border-radius: 12px;
-         border: 1px solid var(--glass-border);
-         background: rgba(255,255,255,0.6);
-         color: var(--text-dark);
-         font-family: 'Inter', sans-serif; font-size: 1rem;
-         transition: all 0.3s;
-     }
-     input[type="text"]:focus { background: rgba(255,255,255,0.9); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
-     
-     input[type="file"]::file-selector-button {
-         background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-         color: var(--text-dark); border: none; padding: 10px 20px;
-         border-radius: 8px; cursor: pointer; font-weight: 600; margin-right: 15px;
-     }
+/* 🌸 FLOWER ANIMATION (CONTROLLED) */
+.flower {
+position: absolute;
+top: -20px;
+font-size: 18px;
+animation: fall linear infinite;
+opacity: 0.8;
+}
 
-     button {
-         width: 100%; padding: 16px; border: none; border-radius: 12px;
-         font-size: 1.2rem; font-weight: 600; cursor: pointer;
-         transition: transform 0.2s, box-shadow 0.2s;
-         margin-bottom: 15px;
-     }
-     button.primary {
-         background: linear-gradient(to right, #ff416c, #ff4b2b);
-         color: white; box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4);
-     }
-     button.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 75, 43, 0.6); }
-     
-     button.secondary {
-         background: rgba(255,255,255,0.9); color: var(--text-dark);
-     }
+@keyframes fall {
+0% {
+transform: translateY(-20px) rotate(0deg);
+}
+100% {
+transform: translateY(300px) rotate(360deg);
+}
+}
 
-     /* Loading Animation */
-     #processing, #result { display: none; text-align: center; }
-     .spinner {
-         width: 60px; height: 60px; border: 6px solid rgba(255,255,255,0.3);
-         border-top-color: #fff; border-radius: 50%;
-         animation: spin 1s linear infinite; margin: 0 auto 20px auto;
-     }
-     @keyframes spin { to { transform: rotate(360deg); } }
+/* TABLE */
+.leaderboard-table {
+width: 100%;
+margin-top: 10px;
+border-collapse: collapse;
+background: rgba(255,255,255,0.1);
+border-radius: 10px;
+overflow: hidden;
+}
 
-     /* --- THE VIRAL CARD DESIGN (Hidden from DOM, used for Image Generation) --- */
-     #card-render-container {
-         position: absolute; top: -9999px; left: -9999px;  width: 1080px; height:1720px;/* Hide offscreen */
-     }
-     .instagram-card {
-         width: 1080px; height: 1720px; /* High Res Square for IG */
-         background-color: #fdfaf6; /* Cream background */
-         background-image: radial-gradient(#ffb7b2 1px, transparent 1px);
-         background-size: 40px 40px; /* Subtle dotted pattern */
-         display: flex; flex-direction: column; align-items: center; justify-content: center;
-         padding: 80px; text-align: center; color: #2d3436;
-         box-sizing: border-box; position: relative;
-     
-     }
-     /* Floral borders simulation using emojis and positioning */
-     .floral-top { position: absolute; top: 40px; left: 40px; font-size: 80px; }
-     .floral-bottom { position: absolute; bottom: 40px; right: 40px; font-size: 80px; transform: scaleX(-1); }
+.leaderboard-table td {
+padding: 10px;
+border-bottom: 1px solid rgba(255,255,255,0.2);
+}
 
-     .card-header-icon { font-size: 50px; margin-bottom: 10px; }
-     .card-title { font-family: 'Playfair Display', serif; font-size: 55px; font-weight: 700; color: #1e3799; letter-spacing: 4px; margin-bottom: 20px; text-transform: uppercase;}
-     .card-subtitle { font-family: 'Inter', sans-serif; font-size: 35px; color: #636e72; margin-bottom: 60px; }
-     
-     .card-name { font-family: 'Great Vibes'; font-size: 110px; color: #e55039; margin-bottom: 40px; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); line-height: 1; }
-     .card-time { font-family: 'Inter', sans-serif; font-size: 45px; font-weight: 600; color: #2d3436; margin-bottom: 60px; background: rgba(229, 80, 57, 0.1); padding: 15px 40px; border-radius: 50px;}
-     
-     .card-shayari { font-family: 'Playfair Display', serif; font-size: 45px; font-style: italic; color: #2d3436; line-height: 1.5; padding: 0 40px; margin-bottom: 60px;}
-     
-     .card-divider { font-size: 30px; letter-spacing: 5px; color: #b2bec3; margin-bottom: 20px;}
-     .card-footer { font-family: 'Inter', sans-serif; font-size: 30px; font-weight: 600; color: #e55039; letter-spacing: 2px;}
+/* TOAST */
+#toast-container {
+position: fixed;
+top: 20px;
+right: 20px;
+}
 
-     /* Displayed Generated Image */
-     #generated-image-preview {
-         width: 100%; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-         margin-bottom: 25px; border: 4px solid white;
-     }
+.toast {
+background: black;
+color: white;
+padding: 10px 15px;
+margin-bottom: 10px;
+border-radius: 10px;
+opacity: 0;
+transform: translateX(100%);
+transition: 0.3s;
+}
 
-     /* Leaderboard */
-     .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden;}
-     .leaderboard-table th, .leaderboard-table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.2); }
-     .leaderboard-table th { font-weight: 600; background: rgba(0,0,0,0.2); }
-     .rank { width: 40px; font-weight: bold; color: #ffeaa7; text-align: center;}
-     .time { font-weight: bold; text-align: right;}
-     
-     main {
-     max-width: 600px;
-     margin: auto;
-     }
+.toast.show {
+opacity: 1;
+transform: translateX(0);
+}
+
+/* ANIMATION */
+@keyframes pop {
+from {
+transform: scale(0.9);
+opacity: 0;
+}
+to {
+transform: scale(1);
+opacity: 1;
+}
+}
+
+/* HIDE */
+#processing,
+#result {
+display: none;
+}
+
+/* CENTER MAIN */
+main {
+max-width: 600px;
+width: 100%;
+}
