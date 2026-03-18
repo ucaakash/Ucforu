@@ -666,22 +666,13 @@ canvasImg.toBlob(async (blob)=>{
 const file = new File([blob], "ChallengeCard.png", {type:"image/png"});
 
 const shareText =
-`⚔️ Screen Time Challenge
+`⚔️ ${currentNickname} challenged you!
 
-My screen time today: ${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m
+My screen time: ${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m
 
 Can you beat me? 😎
 
 ${challengeLink}`;
-
-if(navigator.canShare && navigator.canShare({files:[file]})){
-
-await navigator.share({
-files:[file],
-title:"Screen Time Challenge",
-text:shareText,
-url:challengeLink
-});
 
 }else{
 
