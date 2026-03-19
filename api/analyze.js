@@ -5,10 +5,11 @@ module.exports = async (req, res) => {
     const { imageBase64 } = req.body;
     const apiKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : null;
 
-    if (!apiKey) return res.status(500).json({ error: 'API Key Missing' });
+    if (!apiKey) return res.status(500).json({ error: 'API Key Missing in Vercel!' });
 
-    // MODEL NAME CHANGED TO: gemini-1.5-flash-latest
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    // MODEL NAME UPDATED TO: gemini-2.5-flash
+    // Endpoint: v1beta (Naye models ke liye yahi best hai)
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -16,7 +17,7 @@ module.exports = async (req, res) => {
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: "Analyze this mobile screen time image. Return ONLY a valid JSON: {\"isRealScreenshot\":true, \"hours\":5, \"minutes\":30, \"shayari\":\"hindi roast shayari\"}. No extra text." },
+            { text: "Analyze this mobile screen time image. Return ONLY a valid JSON object: {\"isRealScreenshot\": true, \"isOwnCard\": false, \"hours\": 5, \"minutes\": 30, \"shayari\": \"Your funny Hindi roast shayari here\"}. No extra text or markdown code blocks." },
             { inline_data: { mime_type: "image/jpeg", data: imageBase64.split(',')[1] } }
           ]
         }]
@@ -24,24 +25,21 @@ module.exports = async (req, res) => {
     });
 
     const data = await response.json();
+    console.log("Gemini 2.5 Status:", response.status);
 
-    // Agar ab bhi Google error de, toh humein exact pata chalega
     if (data.error) {
-      console.error("GOOGLE_ERROR:", data.error.message);
-      return res.status(500).json({ error: "Google says: " + data.error.message });
+      console.error("GOOGLE ERROR:", data.error.message);
+      return res.status(response.status).json({ error: data.error.message });
     }
 
-    if (!data.candidates || !data.candidates[0]) {
-      return res.status(500).json({ error: "AI ne koi jawab nahi diya" });
-    }
-
+    // AI Response Extract
     let aiText = data.candidates[0].content.parts[0].text;
     aiText = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
     
     res.status(200).json(JSON.parse(aiText));
 
   } catch (err) {
-    console.error("CRASH_ERROR:", err.message);
+    console.error("CRASH:", err.message);
     res.status(500).json({ error: "Server Busy: " + err.message });
   }
 };
