@@ -42,62 +42,55 @@ try {
 }
 
 // ==========================================
-// 3. OCR IMAGE PRE-PROCESSING (For Accuracy)
-// ==========================================
-async function preprocessImage(file) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                
-                // Grayscale aur High Contrast apply karein taaki iPhone/Android text saaf dikhe
-                ctx.filter = 'grayscale(100%) contrast(150%) brightness(100%)';
-                ctx.drawImage(img, 0, 0);
-                resolve(canvas.toDataURL('image/jpeg', 0.8));
-            };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    });
-}
-
-// ==========================================
-// 4. MASTER OCR PARSER
+// 3. MASTER OCR PARSER (SUPER STRONG)
 // ==========================================
 function parseScreentime(text) {
+    // Text ko lower case aur clean karo
     let cleanText = text.toLowerCase().replace(/\n/g, ' ').replace(/\s+/g, ' ');
 
-    // iPhone Font Fix: l, i, |, ! ko 1 banao agar wo time ke paas hain
-    cleanText = cleanText.replace(/(^|\s)(l|i|\||!)\s*h/g, ' 1h');
-    cleanText = cleanText.replace(/(^|\s)(l|i|\||!)\s*m/g, ' 1m');
+    // iPhone Font Fix: l, i, |, !, [, ] ko 1 banao agar wo h ya m ke paas hain
+    cleanText = cleanText.replace(/(^|\s)(l|i|\||!|\[|\])\s*h/g, ' 1h');
+    cleanText = cleanText.replace(/(^|\s)(l|i|\||!|\[|\])\s*m/g, ' 1m');
 
     let hours = 0, minutes = 0;
 
-    // Time dhundne ke patterns (Pehle strict, phir loose)
+    // Har tarah ka time format pakadne ke liye patterns
     const patterns = [
-        /(?:daily average|total|screen time|activity)\s*(\d+)\s*h\s*(\d+)\s*m/i,
-        /(?:daily average|total|screen time|activity)\s*(\d+)\s*h/i,
-        /(\d+)\s*h\s*(\d+)\s*m/i,
-        /(\d+)\s*hr\s*(\d+)\s*min/i,
-        /(\d+)\s*h\s*(?!\d+m)/i 
+        // Pattern 1: Keywords ke baad Xh Ym (e.g., Daily average 5h 30m, Screen time 5 hr 30 min)
+        /(?:daily average|screen time|total|today|activity).*?(\d+)\s*(?:h|hr|hrs).*?(\d+)\s*(?:m|min|mins)/i,
+        // Pattern 2: Keywords ke baad sirf Xh (e.g., Daily average 5h)
+        /(?:daily average|screen time|total|today|activity).*?(\d+)\s*(?:h|hr|hrs)/i,
+        // Pattern 3: Kahi bhi Xh Ym likha ho
+        /(\d+)\s*(?:h|hr|hrs)\s*(\d+)\s*(?:m|min|mins)/i,
+        // Pattern 4: Kahi bhi Xh likha ho
+        /(\d+)\s*(?:h|hr|hrs)/i,
+        // Pattern 5: Agar time sirf minutes me ho (e.g., 45m)
+        /(\d+)\s*(?:m|min|mins)/i
     ];
 
     for (let regex of patterns) {
         const match = cleanText.match(regex);
         if (match) {
-            hours = parseInt(match[1]) || 0;
-            // Agar second group (minutes) nahi hai, toh 0 maan lo
-            minutes = match[2] ? parseInt(match[2]) : 0;
-            break; 
+            // Agar Pattern 1 ya 3 match hua (isme hours aur minutes dono hain)
+            if (match[1] && match[2]) {
+                hours = parseInt(match[1]) || 0;
+                minutes = parseInt(match[2]) || 0;
+            } 
+            // Agar sirf minutes ka pattern hai
+            else if (regex.source.includes('min')) {
+                hours = 0;
+                minutes = parseInt(match[1]) || 0;
+            } 
+            // Agar sirf hours ka pattern hai
+            else {
+                hours = parseInt(match[1]) || 0;
+                minutes = 0;
+            }
+            break; // Jaise hi pehla pattern match ho, loop rok do
         }
     }
 
-    // Safety Validation
+    // Safety Validation (Galat data ko roko)
     if (hours > 24) hours = 0;
     if (minutes >= 60) minutes = 0;
 
@@ -110,7 +103,7 @@ function parseScreentime(text) {
 }
 
 // ==========================================
-// 5. MAIN ACTION: ANALYZE BUTTON
+// 4. MAIN ACTION: ANALYZE BUTTON
 // ==========================================
 document.getElementById('analyzeBtn').addEventListener('click', async () => {
     const nickname = document.getElementById('nickname').value.trim();
@@ -125,27 +118,29 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     document.getElementById('processing').style.display = 'block';
 
     try {
-        // Step 1: Image Pre-processing
-        const processedImage = await preprocessImage(file);
+        console.log("OCR Start ho raha hai... Please wait.");
         
-        // Step 2: Tesseract OCR Run
-        const { data: { text } } = await Tesseract.recognize(processedImage, 'eng');
+        // DIRECT FILE READ: Original high-quality image seedha AI ko do
+        const { data: { text } } = await Tesseract.recognize(file, 'eng', {
+            logger: m => console.log("Tesseract Progress:", m) 
+        });
+        
         const cleanText = text.toLowerCase();
+        console.log("OCR Ne Ye Padha Hai:\n", cleanText);
 
-        // Step 3: Security Checks
+        // Security Checks
         if (cleanText.includes("ucforu") || cleanText.includes("download card")) {
             throw new Error("BLACKlisted");
         }
-        const isReal = cleanText.includes("screen time") || cleanText.includes("wellbeing") || cleanText.includes("daily") || cleanText.includes("activity");
-        if (!isReal) {
-            console.warn("Might not be a screenshot, but trying anyway...");
+
+        // Parse Time
+        const timeData = parseScreentime(text);
+        
+        if (timeData.totalMinutes === 0) {
+            throw new Error("ZERO");
         }
 
-        // Step 4: Parse Time
-        const timeData = parseScreentime(text);
-        if (timeData.totalMinutes === 0) throw new Error("ZERO");
-
-        // Step 5: Success & UI Update
+        // Success Flow
         currentUserTime = timeData.totalMinutes;
         currentNickname = nickname;
 
@@ -154,10 +149,9 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         document.getElementById('render-time').innerText = `${timeData.formatted} screen time`;
         document.getElementById('render-shayari').innerText = `"${randomShayari}"`;
 
-        // Generate QR before rendering card
         generateMyQR();
 
-        // Wait for fonts & render
+        // Canvas Rendering for Download
         await document.fonts.ready;
         const renderCard = document.getElementById('instagram-card');
         const canvas = await html2canvas(renderCard, { scale: 2, useCORS: true, backgroundColor: "#fdfaf6" });
@@ -166,25 +160,24 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         document.getElementById('processing').style.display = 'none';
         document.getElementById('result').style.display = 'block';
 
-        // Save Data & Handle Challenges
         saveToLeaderboard(timeData.formatted);
         if (window.challengeData) handleBattle(timeData);
 
     } catch (error) {
-        console.error("OCR Error:", error);
+        console.error("Error Detail:", error);
         document.getElementById('processing').style.display = 'none';
         document.getElementById('inputForm').style.display = 'block';
         
         let errorMsg = "Sahi screenshot daaliye! Detect nahi hua 🧐";
         if (error.message === "BLACKlisted") errorMsg = "Yeh toh hamara hi card hai! 😂 Asli photo daaliye.";
-        if (error.message === "ZERO") errorMsg = "Time detect nahi hua. Saaf photo daaliye!";
+        if (error.message === "ZERO") errorMsg = "Time nahi mila! Screenshot thoda clear upload karein.";
         
         showToast(errorMsg, "error");
     }
 });
 
 // ==========================================
-// 6. CHALLENGE & BATTLE LOGIC
+// 5. CHALLENGE & BATTLE LOGIC
 // ==========================================
 function handleBattle(userData) {
     const d = window.challengeData;
@@ -233,7 +226,7 @@ document.getElementById("challengeBtn").addEventListener("click", async () => {
 });
 
 // ==========================================
-// 7. LEADERBOARD LOGIC
+// 6. LEADERBOARD LOGIC
 // ==========================================
 function saveToLeaderboard(timeStr) {
     if (database) {
@@ -252,13 +245,11 @@ function loadLeaderboard() {
     const tbody = document.getElementById('leaderboardBody');
     if (!database) return;
 
-    // Highest time wale top par aayenge (limitToLast 10)
     database.ref('leaderboard/' + dailyKey).orderByChild('totalMinutes').limitToLast(10).on('value', (snap) => {
         tbody.innerHTML = "";
         if (snap.exists()) {
             let res = []; 
             snap.forEach(c => res.push(c.val()));
-            // Reverse taaki highest upar aaye
             res.reverse().forEach((d, i) => {
                 const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`;
                 tbody.innerHTML += `<tr><td>${medal}</td><td>${d.nickname}</td><td class="time">${d.formattedTime}</td></tr>`;
@@ -270,7 +261,7 @@ function loadLeaderboard() {
 }
 
 // ==========================================
-// 8. UI HELPERS & BUTTONS (Toast, QR, Modals)
+// 7. UI HELPERS & BUTTONS
 // ==========================================
 function showToast(msg, type) {
     const container = document.getElementById("toast-container");
@@ -295,7 +286,6 @@ function generateMyQR() {
     }
 }
 
-// Download Button
 document.getElementById('downloadBtn').onclick = () => {
     const a = document.createElement('a');
     a.download = `UCforU_${currentNickname}.png`;
@@ -304,7 +294,6 @@ document.getElementById('downloadBtn').onclick = () => {
     showToast("Card Downloaded! ❤️", "success");
 };
 
-// Share Link Button
 document.getElementById('shareBtn').onclick = async () => {
     const link = window.location.origin + window.location.pathname;
     if (navigator.share) {
@@ -316,7 +305,7 @@ document.getElementById('shareBtn').onclick = async () => {
 };
 
 // ==========================================
-// 9. INITIALIZATION & GUIDE TABS
+// 8. INITIALIZATION & GUIDE
 // ==========================================
 window.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
@@ -328,18 +317,15 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Auto-guide popup logic
     if (!localStorage.getItem('guideShown') || window.challengeID) {
         setTimeout(() => { document.getElementById('guideModal').style.display = 'flex'; }, 1000);
     }
 });
 
-// Guide Manual Trigger
 document.getElementById('guideBtn').onclick = () => {
     document.getElementById('guideModal').style.display = 'flex';
 };
 
-// Guide Tab Logic
 document.getElementById('tabAndroid').onclick = () => {
     document.getElementById('contentAndroid').style.display = 'block';
     document.getElementById('contentIphone').style.display = 'none';
