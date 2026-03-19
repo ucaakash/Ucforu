@@ -81,7 +81,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         document.getElementById('processing').style.display = 'none';
         document.getElementById('result').style.display = 'block';
 
-        // ⚔️ VS Battle Result
+        // âš”ï¸ VS Battle Result
         if(window.challengeData){
             let creatorTime = window.challengeData.creatorTime;
             let winner = currentUserTime > creatorTime ? currentNickname : window.challengeData.creator;
@@ -107,12 +107,12 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
                         <div class="player-time">${userH}h ${userM}m</div>
                     </div>
                 </div>
-                <div class="winner-text">👑 Winner: ${winner}</div>
+                <div class="winner-text">ðŸ‘‘ Winner: ${winner}</div>
             `;
 
             document.getElementById("result").prepend(card);
 
-            const flowers=["🌸","💐","🌹"];
+            const flowers=["ðŸŒ¸","ðŸ’","ðŸŒ¹"];
             for(let i=0;i<8;i++){
                 let f=document.createElement("div");
                 f.className="flower";
@@ -204,7 +204,7 @@ function loadLeaderboard() {
             results.reverse();
             
             results.forEach((data, index) => {
-                const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
+                const medal = index === 0 ? "ðŸ¥‡" : index === 1 ? "ðŸ¥ˆ" : index === 2 ? "ðŸ¥‰" : (index + 1);
                 tbody.innerHTML += `<tr>
                     <td>${medal}</td>
                     <td>${data.nickname}</td>
@@ -226,3 +226,208 @@ function generateMyQR() {
         colorDark : "#000000",
         colorLight : "#ffffff",
         correctLevel : QRCode.CorrectLevel.H
+    });
+}
+
+generateMyQR();
+
+document.addEventListener("DOMContentLoaded", () => {
+    const challengeBtn = document.getElementById("challengeBtn");
+    
+    if(!challengeBtn){
+        console.log("Challenge button not found");
+        return;
+    }
+
+    challengeBtn.addEventListener("click", async () => {
+        try{
+            const challengeID = btoa(currentNickname + Date.now()).replace(/=/g,"");
+            const challengeLink = `${location.origin}${location.pathname}?challenge=${challengeID}`;
+
+            if(database){
+                database.ref("challenges/"+challengeID).set({
+                    creator: currentNickname,
+                    creatorTime: currentUserTime,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+
+            const canvas = document.getElementById("instagram-card");
+            const canvasImg = await html2canvas(canvas);
+
+            canvasImg.toBlob(async (blob)=>{
+                const file = new File([blob], "ChallengeCard.png", {type:"image/png"});
+                const shareText = `âš”ï¸ ${currentNickname} challenged you!\n\nMy screen time: ${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m\n\nCan you beat me? ðŸ˜Ž\n\n${challengeLink}`;
+
+                // Fixed the Missing If condition here
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: "Screen Time Challenge",
+                        text: shareText,
+                        url: challengeLink
+                    });
+                } else {
+                    navigator.clipboard.writeText(challengeLink);
+                    showToast("Challenge link copied ðŸ”¥", "success");
+                }
+            });
+
+        }catch(err){
+            console.error(err);
+            alert("Challenge failed");
+        }
+    });
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    const challengeID = params.get("challenge");
+
+    if(challengeID){
+        const banner = document.createElement("div");
+        banner.style.background = "rgba(0,0,0,0.3)";
+        banner.style.padding = "15px";
+        banner.style.borderRadius = "12px";
+        banner.style.marginBottom = "20px";
+        banner.style.textAlign = "center";
+        
+        banner.innerHTML = `
+        <h3>âš”ï¸ Friend Challenge</h3>
+        <p>Loading challenge...</p>
+        `;
+        
+        document.querySelector("main").prepend(banner);
+
+        database.ref("challenges/"+challengeID).once("value").then((snap)=>{
+            if(snap.exists()){
+                const data = snap.val();
+                window.challengeData = data;
+                banner.innerHTML = `
+                <h3>âš”ï¸ Challenge From ${data.creator}</h3>
+                <p>Screen Time: ${Math.floor(data.creatorTime/60)}h ${data.creatorTime%60}m</p>
+                <p>Upload your screenshot to beat this score ðŸ†</p>
+                `;
+            }else{
+                banner.innerHTML = `<h3>Challenge not found</h3>`;
+            }
+        });
+    }
+});
+
+function showToast(message, type = "info") {
+    const container = document.getElementById("toast-container");
+    const toast = document.createElement("div");
+    toast.className = "toast " + type;
+
+    let icon = "â„¹ï¸";
+    if(type === "success") icon = "âœ…";
+    if(type === "error") icon = "âŒ";
+
+    toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div>${message}</div>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add("show");
+    }, 100);
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => {
+            toast.remove();
+        }, 400);
+    }, 3000);
+}
+
+// Guide Modal Logic
+const guideBtn = document.getElementById('guideBtn');
+const guideModal = document.getElementById('guideModal');
+const closeGuide = document.getElementById('closeGuide');
+const tabAndroid = document.getElementById('tabAndroid');
+const tabIphone = document.getElementById('tabIphone');
+const contentAndroid = document.getElementById('contentAndroid');
+const contentIphone = document.getElementById('contentIphone');
+
+if(guideBtn) {
+    guideBtn.onclick = () => guideModal.style.display = 'flex';
+}
+
+if(closeGuide) {
+    closeGuide.onclick = () => guideModal.style.display = 'none';
+}
+
+// Tab Switching
+tabAndroid.onclick = () => {
+    contentAndroid.style.display = 'block';
+    contentIphone.style.display = 'none';
+    tabAndroid.className = 'primary';
+    tabIphone.className = 'secondary';
+};
+
+tabIphone.onclick = () => {
+    contentAndroid.style.display = 'none';
+    contentIphone.style.display = 'block';
+    tabAndroid.className = 'secondary';
+    tabIphone.className = 'primary';
+};
+
+// Background click se band karne ke liye
+window.onclick = (event) => {
+    if (event.target == guideModal) {
+        guideModal.style.display = "none";
+    }
+};
+
+// --- Isse script.js ke ekdum last mein paste karein ---
+
+window.addEventListener("DOMContentLoaded", () => {
+    const guideModal = document.getElementById('guideModal');
+    const params = new URLSearchParams(window.location.search);
+    const challengeID = params.get("challenge");
+
+    // 1. Automatic Popup Logic
+    // Agar koi challenge link se aaya hai (URL mein ?challenge=... hai)
+    // YA fir user pehli baar site par aaya hai
+    if (challengeID || !localStorage.getItem('guideShown')) {
+        setTimeout(() => {
+            if(guideModal) {
+                guideModal.style.display = 'flex';
+                
+                // Agar tum chahte ho ki sirf ek baar dikhe, toh niche wali line se comment hata dena
+                // localStorage.setItem('guideShown', 'true'); 
+            }
+        }, 1200); // 1.2 seconds baad popup aayega
+    }
+
+    // 2. Challenge Title Change (Agar link se aaya hai)
+    if(challengeID) {
+        const guideTitle = document.querySelector("#guideModal h2");
+        if(guideTitle) guideTitle.innerHTML = "Accept Challenge! âš”ï¸";
+    }
+
+    // 3. Tab & Close Logic (Jo pehle diya tha)
+    const tabAndroid = document.getElementById('tabAndroid');
+    const tabIphone = document.getElementById('tabIphone');
+    const contentAndroid = document.getElementById('contentAndroid');
+    const contentIphone = document.getElementById('contentIphone');
+
+    if(tabAndroid && tabIphone) {
+        tabAndroid.onclick = () => {
+            contentAndroid.style.display = 'block';
+            contentIphone.style.display = 'none';
+            tabAndroid.className = 'primary';
+            tabIphone.className = 'secondary';
+        };
+
+        tabIphone.onclick = () => {
+            contentAndroid.style.display = 'none';
+            contentIphone.style.display = 'block';
+            tabAndroid.className = 'secondary';
+            tabIphone.className = 'primary';
+        };
+    }
+});
