@@ -9,29 +9,21 @@ module.exports = async (req, res) => {
     const { imageBase64 } = req.body;
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // STEP 1: Key Check
     if (!apiKey) {
-      console.error("ERROR: GEMINI_API_KEY is missing in Vercel settings!");
+      console.error("ERROR: API Key Missing");
       return res.status(500).json({ error: 'API Key Missing' });
     }
-    console.log("API Key found (Length):", apiKey.length);
 
-    // STEP 2: Body Check
-    if (!imageBase64) {
-      console.error("ERROR: No image data received in request body!");
-      return res.status(400).json({ error: 'No image uploaded' });
-    }
+    // YAHAN CHANGE KIYA HAI: v1beta ki jagah v1 use kiya hai
+    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
-    // STEP 3: Gemini Call
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: "Analyze this mobile screen time image. Return ONLY a valid JSON object: {\"isRealScreenshot\": true, \"isOwnCard\": false, \"hours\": 5, \"minutes\": 30, \"shayari\": \"funny roast\"}. No extra text or markdown." },
+            { text: "Analyze this mobile screen time image. Return ONLY a valid JSON object: {\"isRealScreenshot\": true, \"isOwnCard\": false, \"hours\": 5, \"minutes\": 30, \"shayari\": \"Your funny Hindi roast shayari here\"}. No extra text or markdown code blocks." },
             { inline_data: { mime_type: "image/jpeg", data: imageBase64.split(',')[1] } }
           ]
         }]
@@ -39,25 +31,22 @@ module.exports = async (req, res) => {
     });
 
     const data = await response.json();
-    console.log("Gemini Raw Response Status:", response.status);
+    console.log("Gemini API Status:", response.status);
 
     if (data.error) {
-      console.error("Gemini API Error:", JSON.stringify(data.error));
-      return res.status(500).json({ error: "Gemini API failed" });
+      console.error("Gemini Error:", JSON.stringify(data.error));
+      return res.status(500).json({ error: data.error.message });
     }
 
-    // STEP 4: Parse AI Text
+    // AI Text Extract aur Clean karna
     let aiText = data.candidates[0].content.parts[0].text;
-    console.log("AI Text before cleaning:", aiText);
-    
     aiText = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
+    
     const result = JSON.parse(aiText);
-
-    console.log("Final Result sent to frontend!");
     res.status(200).json(result);
 
   } catch (err) {
-    console.error("CRASH ERROR:", err.message);
-    res.status(500).json({ error: "Server Crash: " + err.message });
+    console.error("CRASH:", err.message);
+    res.status(500).json({ error: err.message });
   }
 };
