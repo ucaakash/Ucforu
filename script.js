@@ -219,37 +219,56 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 });
 function parseScreentime(text) {
     let hours = 0, minutes = 0;
-    // Extra spaces saaf karo
+
+    if (!text) {
+        return { hours: 0, minutes: 0, totalMinutes: 0 };
+    }
+
+    // Clean text
     let cleanText = text.toLowerCase().replace(/\s+/g, ' ');
 
-    // iPhone/Apple Font Fix (l, i, |, ! ko 1 banao)
-    cleanText = cleanText.replace(/(^|\s)(l|i|\||!)\s*h/g, ' 1h');
-    cleanText = cleanText.replace(/(^|\s)(l|i|\||!)\s*m/g, ' 1m');
+    // OCR mistakes fix (l, i, |, ! → 1)
+    cleanText = cleanText.replace(/(\s|^)(l|i|\||!)\s*(?=\d)/g, ' 1');
+    cleanText = cleanText.replace(/(\d+)\s*(l|i|\||!)/g, '$11');
 
-    // 1. TARGETED SEARCH: Pehle "Daily Average" ya "Total" ke turant baad wala time dhundo
-    const targetMatch = cleanText.match(/(daily average|total|screen time)\s*(\d+)\s*h\s*(\d+)\s*m/);
+    // Common format normalize
+    cleanText = cleanText
+        .replace(/hours?/g, 'h')
+        .replace(/mins?|minutes?/g, 'm');
 
-    if (targetMatch) {
-        // Agar "Daily Average" mil gaya, toh uske baad wala hi real time hai
-        hours = parseInt(targetMatch[2]);
-        minutes = parseInt(targetMatch[3]);
+    // 🎯 PRIORITY MATCH (Daily Average / Screen Time / Total)
+    let match = cleanText.match(/(daily average|screen time|total)[^\d]*(\d{1,2})\s*h[^\d]*(\d{1,2})\s*m/);
+
+    if (match) {
+        hours = parseInt(match[2]);
+        minutes = parseInt(match[3]);
     } else {
-        // 2. Fallback: Agar upar wala nahi mila, toh pehla jo bhi dhang ka time mile
-        const fallbackMatch = cleanText.match(/(\d+)\s*h\s*(\d+)\s*m/);
-        if (fallbackMatch) {
-            hours = parseInt(fallbackMatch[1]);
-            minutes = parseInt(fallbackMatch[2]);
+
+        // 🔁 SECOND MATCH (normal "xh ym")
+        match = cleanText.match(/(\d{1,2})\s*h[^\d]*(\d{1,2})\s*m/);
+
+        if (match) {
+            hours = parseInt(match[1]);
+            minutes = parseInt(match[2]);
+        } else {
+
+            // 🔁 THIRD MATCH (only hours or only minutes)
+            let hMatch = cleanText.match(/(\d{1,2})\s*h/);
+            let mMatch = cleanText.match(/(\d{1,2})\s*m/);
+
+            if (hMatch) hours = parseInt(hMatch[1]);
+            if (mMatch) minutes = parseInt(mMatch[1]);
         }
     }
 
-    // Ghante 24 se zyada nahi ho sakte, minute 60 se zyada nahi
-    hours = (isNaN(hours) || hours > 24) ? 0 : hours;
-    minutes = (isNaN(minutes) || minutes >= 60) ? 0 : minutes;
+    // 🧠 VALIDATION FIX
+    if (isNaN(hours) || hours > 24) hours = 0;
+    if (isNaN(minutes) || minutes >= 60) minutes = 0;
 
-    return { 
-        hours, 
-        minutes, 
-        totalMinutes: (hours * 60) + minutes 
+    return {
+        hours,
+        minutes,
+        totalMinutes: (hours * 60) + minutes
     };
 }
 
