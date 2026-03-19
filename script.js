@@ -219,19 +219,56 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 });
 function parseScreentime(text) {
     let hours = 0, minutes = 0;
-    const cleanText = text.toLowerCase().replace(/\s+/g, ' ');
-    const match1 = cleanText.match(/(\d+)\s*h\s*(\d+)\s*m/);
-    const match2 = cleanText.match(/(\d+)\s*hours?\s*(\d+)\s*min/);
-    if (match1) { hours = parseInt(match1[1]); minutes = parseInt(match1[2]); }
-    else if (match2) { hours = parseInt(match2[1]); minutes = parseInt(match2[2]); }
-    else {
-        const hMatch = cleanText.match(/(\d+)\s*(h|hour)/);
-        const mMatch = cleanText.match(/(\d+)\s*(m|min)/);
-        if(hMatch) hours = parseInt(hMatch[1]);
-        if(mMatch) minutes = parseInt(mMatch[1]);
+
+    if (!text) {
+        return { hours: 0, minutes: 0, totalMinutes: 0 };
     }
-    hours = isNaN(hours) ? 0 : hours; minutes = isNaN(minutes) ? 0 : minutes;
-    return { hours, minutes, totalMinutes: (hours * 60) + minutes };
+
+    // Clean text
+    let cleanText = text.toLowerCase().replace(/\s+/g, ' ');
+
+    // OCR mistake fix (l, i, |, ! → 1)
+    cleanText = cleanText.replace(/[li|!]/g, '1');
+
+    // Normalize words
+    cleanText = cleanText
+        .replace(/hours?/g, 'h')
+        .replace(/mins?|minutes?/g, 'm');
+
+    // 🎯 Priority: Daily Average / Screen Time
+    let match = cleanText.match(/(daily average|screen time|total)[^\d]*(\d+)\s*h[^\d]*(\d+)\s*m/);
+
+    if (match) {
+        hours = parseInt(match[2]);
+        minutes = parseInt(match[3]);
+    } else {
+
+        // Normal: 5h 30m
+        match = cleanText.match(/(\d+)\s*h[^\d]*(\d+)\s*m/);
+
+        if (match) {
+            hours = parseInt(match[1]);
+            minutes = parseInt(match[2]);
+        } else {
+
+            // Fallback: only hour / only minute
+            const hMatch = cleanText.match(/(\d+)\s*h/);
+            const mMatch = cleanText.match(/(\d+)\s*m/);
+
+            if (hMatch) hours = parseInt(hMatch[1]);
+            if (mMatch) minutes = parseInt(mMatch[1]);
+        }
+    }
+
+    // Validation
+    if (isNaN(hours) || hours > 24) hours = 0;
+    if (isNaN(minutes) || minutes >= 60) minutes = 0;
+
+    return {
+        hours,
+        minutes,
+        totalMinutes: (hours * 60) + minutes
+    };
 }
 
 function loadLeaderboard() {
