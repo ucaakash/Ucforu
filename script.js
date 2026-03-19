@@ -56,6 +56,15 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     try {
         const { data: { text } } = await Tesseract.recognize(file, 'eng');
         const { hours, minutes, totalMinutes } = parseScreentime(text);
+        // --- NAYA VALIDATION CHECK START ---
+        if (totalMinutes === 0 || hours > 24 || minutes >= 60) {
+            document.getElementById('processing').style.display = 'none';
+            document.getElementById('inputForm').style.display = 'block';
+            showToast("Sahi screenshot daaliye! Screen time detect nahi hua 🧐", "error");
+            return; 
+        }
+        // --- NAYA VALIDATION CHECK END ---
+        
         const timeString = `${hours}h ${minutes}m`;
         currentUserTime = totalMinutes;
         currentNickname = nickname;
