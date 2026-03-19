@@ -219,33 +219,32 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 });
 function parseScreentime(text) {
     let hours = 0, minutes = 0;
-    // Saare ajeeb characters aur extra spaces saaf karo
+    // Extra spaces saaf karo
     let cleanText = text.toLowerCase().replace(/\s+/g, ' ');
 
-    // iPhone Font Fix (l, i, |, ! ko 1 banao)
-    cleanText = cleanText.replace(/(^|\s)(l|i|\||!)\s*h/g, '$11h');
-    cleanText = cleanText.replace(/(^|\s)(l|i|\||!)\s*m/g, '$11m');
+    // iPhone/Apple Font Fix (l, i, |, ! ko 1 banao)
+    cleanText = cleanText.replace(/(^|\s)(l|i|\||!)\s*h/g, ' 1h');
+    cleanText = cleanText.replace(/(^|\s)(l|i|\||!)\s*m/g, ' 1m');
 
-    // REGEX 1: Pure format check (e.g., "1h 2m")
-    const fullMatch = cleanText.match(/(\d+)\s*h\s*(\d+)\s*m/);
-    
-    if (fullMatch) {
-        hours = parseInt(fullMatch[1]);
-        minutes = parseInt(fullMatch[2]);
+    // 1. TARGETED SEARCH: Pehle "Daily Average" ya "Total" ke turant baad wala time dhundo
+    const targetMatch = cleanText.match(/(daily average|total|screen time)\s*(\d+)\s*h\s*(\d+)\s*m/);
+
+    if (targetMatch) {
+        // Agar "Daily Average" mil gaya, toh uske baad wala hi real time hai
+        hours = parseInt(targetMatch[2]);
+        minutes = parseInt(targetMatch[3]);
     } else {
-        // REGEX 2: Agar alag-alag likha ho toh dhundo
-        const hMatch = cleanText.match(/(\d+)\s*(h|hour|hr)/);
-        const mMatch = cleanText.match(/(\d+)\s*(m|min)/);
-        
-        // Sabse bada change: Agar 'h' se pehle wala digit milta hai toh wahi hours hai
-        if (hMatch) hours = parseInt(hMatch[1]);
-        if (mMatch) minutes = parseInt(mMatch[1]);
+        // 2. Fallback: Agar upar wala nahi mila, toh pehla jo bhi dhang ka time mile
+        const fallbackMatch = cleanText.match(/(\d+)\s*h\s*(\d+)\s*m/);
+        if (fallbackMatch) {
+            hours = parseInt(fallbackMatch[1]);
+            minutes = parseInt(fallbackMatch[2]);
+        }
     }
 
-    // Logical Check: Agar hours 0 dikh raha hai par minutes bahut zyada hain (jaise 0h 62m)
-    // Toh usko bhi handle karein
-    hours = isNaN(hours) ? 0 : hours;
-    minutes = isNaN(minutes) ? 0 : minutes;
+    // Ghante 24 se zyada nahi ho sakte, minute 60 se zyada nahi
+    hours = (isNaN(hours) || hours > 24) ? 0 : hours;
+    minutes = (isNaN(minutes) || minutes >= 60) ? 0 : minutes;
 
     return { 
         hours, 
