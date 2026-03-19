@@ -1,3 +1,10 @@
 {
-  "version": 2
+  "functions": {
+    "analyze.js": {
+      "runtime": "vercel-node@latest"
+    }
+  },
+  "rewrites": [
+    { "source": "/analyze", "destination": "/analyze.js" }
+  ]
 }
