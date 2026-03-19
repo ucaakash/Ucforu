@@ -66,7 +66,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         if (isOurOwnCard) {
             document.getElementById('processing').style.display = 'none';
             document.getElementById('inputForm').style.display = 'block';
-            showToast("This is card Image! 😂 Kindly Upload Real Image.", "error");
+            showToast("Yeh toh hamara hi card hai! 😂 Asli phone ki photo daaliye.", "error");
             return; 
         }
         
@@ -86,7 +86,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         if (!isRealScreenshot) {
             document.getElementById('processing').style.display = 'none';
             document.getElementById('inputForm').style.display = 'block';
-            showToast("Fake Screenshot Alert! 🚨 Kindly Upload RealI Image.", "error");
+            showToast("Fake Screenshot Alert! 🚨 Asli photo daaliye.", "error");
             return; 
         }
         
@@ -220,18 +220,35 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 
 function parseScreentime(text) {
     let hours = 0, minutes = 0;
-    const cleanText = text.toLowerCase().replace(/\s+/g, ' ');
+    let cleanText = text.toLowerCase().replace(/\s+/g, ' ');
+
+    // --- OCR ERROR FIX (Apple Font Fix) ---
+    // Tesseract aksar iPhone ke '1' ko small 'l', 'i', ya '|' padh leta hai.
+    cleanText = cleanText.replace(/(^|\s)(l|i|\||!)\s*h/g, '$11h');
+    cleanText = cleanText.replace(/(^|\s)(l|i|\||!)\s*m/g, '$11m');
+    // --------------------------------------
+
     const match1 = cleanText.match(/(\d+)\s*h\s*(\d+)\s*m/);
     const match2 = cleanText.match(/(\d+)\s*hours?\s*(\d+)\s*min/);
-    if (match1) { hours = parseInt(match1[1]); minutes = parseInt(match1[2]); }
-    else if (match2) { hours = parseInt(match2[1]); minutes = parseInt(match2[2]); }
+    
+    if (match1) { 
+        hours = parseInt(match1[1]); 
+        minutes = parseInt(match1[2]); 
+    }
+    else if (match2) { 
+        hours = parseInt(match2[1]); 
+        minutes = parseInt(match2[2]); 
+    }
     else {
         const hMatch = cleanText.match(/(\d+)\s*(h|hour)/);
         const mMatch = cleanText.match(/(\d+)\s*(m|min)/);
         if(hMatch) hours = parseInt(hMatch[1]);
         if(mMatch) minutes = parseInt(mMatch[1]);
     }
-    hours = isNaN(hours) ? 0 : hours; minutes = isNaN(minutes) ? 0 : minutes;
+    
+    hours = isNaN(hours) ? 0 : hours; 
+    minutes = isNaN(minutes) ? 0 : minutes;
+    
     return { hours, minutes, totalMinutes: (hours * 60) + minutes };
 }
 
@@ -475,4 +492,3 @@ window.addEventListener("DOMContentLoaded", () => {
         };
     }
 });
-
