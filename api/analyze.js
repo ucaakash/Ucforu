@@ -1,21 +1,15 @@
 module.exports = async (req, res) => {
-  console.log("--- REQUEST STARTED ---");
-  
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
     const { imageBase64 } = req.body;
-    const apiKey = process.env.GEMINI_API_KEY;
+    // API key ko trim kar rahe hain taki koi extra space link na kharab kare
+    const apiKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : null;
 
-    if (!apiKey) {
-      console.error("ERROR: API Key Missing");
-      return res.status(500).json({ error: 'API Key Missing' });
-    }
+    if (!apiKey) return res.status(500).json({ error: 'API Key Missing in Vercel!' });
 
-    // YAHAN CHANGE KIYA HAI: v1beta ki jagah v1 use kiya hai
-    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Is baar v1beta aur models/gemini-1.5-flash ka ekdum fresh link
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(apiUrl, {
       method: 'POST',
@@ -23,7 +17,7 @@ module.exports = async (req, res) => {
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: "Analyze this mobile screen time image. Return ONLY a valid JSON object: {\"isRealScreenshot\": true, \"isOwnCard\": false, \"hours\": 5, \"minutes\": 30, \"shayari\": \"Your funny Hindi roast shayari here\"}. No extra text or markdown code blocks." },
+            { text: "Analyze this screen time screenshot. Return ONLY JSON: {\"isRealScreenshot\":true, \"hours\":5, \"minutes\":30, \"shayari\":\"hindi roast\"}" },
             { inline_data: { mime_type: "image/jpeg", data: imageBase64.split(',')[1] } }
           ]
         }]
@@ -31,23 +25,21 @@ module.exports = async (req, res) => {
     });
 
     const data = await response.json();
-    console.log("Gemini API Status:", response.status);
+    console.log("Gemini Status:", response.status);
 
     if (data.error) {
-      console.error("Gemini Error:", JSON.stringify(data.error));
+      console.error("Gemini Error Detail:", JSON.stringify(data.error));
+      // Agar model nahi mil raha, toh Gemini khud bata dega kyun
       return res.status(500).json({ error: data.error.message });
     }
 
-    // AI Text Extract aur Clean karna
     let aiText = data.candidates[0].content.parts[0].text;
     aiText = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
     
-    const result = JSON.parse(aiText);
-    res.status(200).json(result);
+    res.status(200).json(JSON.parse(aiText));
 
   } catch (err) {
-    console.error("CRASH:", err.message);
-    res.status(500).json({ error: err.message });
+    console.error("Crash Error:", err.message);
+    res.status(500).json({ error: "Server Busy: " + err.message });
   }
 };
-
