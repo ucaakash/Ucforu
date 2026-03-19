@@ -55,15 +55,37 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 
     try {
         const { data: { text } } = await Tesseract.recognize(file, 'eng');
+        const cleanText = text.toLowerCase();
+        
+        // --- ANTI-FAKE & TIME VALIDATION CHECK START ---
+        // 1. Asli screenshot mein inme se koi ek word zaroor hoga
+        const isRealScreenshot = cleanText.includes("screen time") || 
+                                 cleanText.includes("digital wellbeing") || 
+                                 cleanText.includes("today") || 
+                                 cleanText.includes("dashboard") ||
+                                 cleanText.includes("activity") ||
+                                 cleanText.includes("daily average") ||
+                                 cleanText.includes("time"); // Ek basic fallback
+        
         const { hours, minutes, totalMinutes } = parseScreentime(text);
-        // --- NAYA VALIDATION CHECK START ---
+        
+        // 2. Agar original screenshot wale words nahi mile toh reject
+        if (!isRealScreenshot) {
+            document.getElementById('processing').style.display = 'none';
+            document.getElementById('inputForm').style.display = 'block';
+            showToast("Fake Screenshot Alert! 🚨 Asli photo daaliye.", "error");
+            return; 
+        }
+        
+        // 3. Agar time galat detect hua toh reject
         if (totalMinutes === 0 || hours > 24 || minutes >= 60) {
             document.getElementById('processing').style.display = 'none';
             document.getElementById('inputForm').style.display = 'block';
             showToast("Sahi screenshot daaliye! Screen time detect nahi hua 🧐", "error");
             return; 
         }
-        // --- NAYA VALIDATION CHECK END ---
+        // --- ANTI-FAKE & TIME VALIDATION CHECK END ---
+        
         
         const timeString = `${hours}h ${minutes}m`;
         currentUserTime = totalMinutes;
