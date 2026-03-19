@@ -26,7 +26,6 @@ let database = null;
 let currentUserTime = 0;
 let currentNickname = "";
 
-// Initialize Firebase
 try {
     firebase.initializeApp(firebaseConfig);
     database = firebase.database();
@@ -36,42 +35,54 @@ try {
     console.error("Firebase init error:", error);
 }
 
-// --- 2. THE MASTER OCR LOGIC (No Ghapla) ---
+// --- 2. GOD MODE OCR LOGIC ---
 function parseScreentime(text) {
-    let hours = 0, minutes = 0;
-    let cleanText = text.toLowerCase().replace(/\s+/g, ' ');
+    // Faltu symbols hatao, sirf letters aur numbers rakho
+    let cleanText = text.toLowerCase().replace(/[^a-z0-9\s]/g, ' ');
 
     // Apple Font Fix (l, i, |, ! ko 1 banao)
     cleanText = cleanText.replace(/(^|\s)(l|i|\||!)\s*h/g, ' 1h');
     cleanText = cleanText.replace(/(^|\s)(l|i|\||!)\s*m/g, ' 1m');
 
-    // TARGETED SEARCH: Pehle "Daily Average", "Total" ke turant baad wala time dhundo
-    const targetMatch = cleanText.match(/(daily average|total|screen time|activity)\s*(\d+)\s*h\s*(\d+)\s*m/);
-    const targetMatchShort = cleanText.match(/(daily average|total|screen time|activity)\s*(\d+)\s*h/);
+    // Screenshot mein jitne bhi Time format likhe hain, sabko dhoondho
+    const timeRegex = /(\d+)\s*(?:h|hr|hour|hours)\s*(\d+)\s*(?:m|min|mins|minutes)/g;
+    let match;
+    let allFoundTimes = [];
 
-    if (targetMatch) {
-        hours = parseInt(targetMatch[2]);
-        minutes = parseInt(targetMatch[3]);
-    } else if (targetMatchShort) {
-        hours = parseInt(targetMatchShort[2]);
-        minutes = 0;
-    } else {
-        // Fallback: Agar keyword nahi mila, toh pehla valid time dhundo
-        const fallback = cleanText.match(/(\d+)\s*h\s*(\d+)\s*m/);
-        if (fallback) {
-            hours = parseInt(fallback[1]);
-            minutes = parseInt(fallback[2]);
+    // Saare times ko ek list mein daalo
+    while ((match = timeRegex.exec(cleanText)) !== null) {
+        allFoundTimes.push({
+            hours: parseInt(match[1]),
+            minutes: parseInt(match[2])
+        });
+    }
+
+    // Agar sirf Ghante (Hours) likhe hain (e.g. "5h") aur minute nahi hai
+    if (allFoundTimes.length === 0) {
+        const hourOnlyRegex = /(\d+)\s*(?:h|hr|hour|hours)/g;
+        while ((match = hourOnlyRegex.exec(cleanText)) !== null) {
+            allFoundTimes.push({ hours: parseInt(match[1]), minutes: 0 });
         }
     }
 
-    // Validation
-    hours = (isNaN(hours) || hours > 24) ? 0 : hours;
-    minutes = (isNaN(minutes) || minutes >= 60) ? 0 : minutes;
+    // Validation: Sirf wahi time rakho jo logical ho (24 ghante se kam, 60 minute se kam)
+    let validTimes = allFoundTimes.filter(t => t.hours > 0 && t.hours <= 24 && t.minutes >= 0 && t.minutes < 60);
 
-    return { hours, minutes, totalMinutes: (hours * 60) + minutes };
+    if (validTimes.length > 0) {
+        // Screenshot mein hamesha Total/Average Time sabse UPAR hota hai
+        // Isliye hum list ka sabse PEHLA time utha lenge
+        let finalTime = validTimes[0];
+        return {
+            hours: finalTime.hours,
+            minutes: finalTime.minutes,
+            totalMinutes: (finalTime.hours * 60) + finalTime.minutes
+        };
+    }
+
+    return { hours: 0, minutes: 0, totalMinutes: 0 };
 }
 
-// --- 3. ANALYZE BUTTON (Image Processing) ---
+// --- 3. ANALYZE BUTTON ---
 document.getElementById('analyzeBtn').addEventListener('click', async () => {
     const nickname = document.getElementById('nickname').value.trim();
     const file = document.getElementById('screenshot').files[0];
@@ -93,11 +104,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
             throw new Error("OWN_CARD");
         }
         
-        // Whitelist: Must be real settings screenshot
-        const isRealScreenshot = cleanText.includes("screen time") || cleanText.includes("digital wellbeing") || cleanText.includes("today") || cleanText.includes("activity") || cleanText.includes("daily");
-        if (!isRealScreenshot) throw new Error("FAKE_PHOTO");
-        
-        // Time Detection
+        // Time Detection (Strict words check hata diya hai, ab OCR mistakes se farq nahi padega)
         const timeData = parseScreentime(text);
         if (timeData.totalMinutes === 0) throw new Error("INVALID_TIME");
         
@@ -133,8 +140,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         document.getElementById('inputForm').style.display = 'block';
         
         if (error.message === "OWN_CARD") showToast("Yeh toh hamara hi card hai! 😂 Asli photo daaliye.", "error");
-        else if (error.message === "FAKE_PHOTO") showToast("Fake Alert! 🚨 Asli photo daaliye.", "error");
-        else showToast("Sahi screenshot daaliye! Detect nahi hua 🧐", "error");
+        else showToast("Time detect nahi hua 🧐 Ekdum clear photo daaliye!", "error");
     }
 });
 
@@ -176,120 +182,4 @@ function loadLeaderboard() {
     const dailyKey = new Date().toISOString().split('T')[0];
     const tbody = document.getElementById('leaderboardBody');
     
-    database.ref('leaderboard/' + dailyKey).orderByChild('totalMinutes').limitToLast(10).on('value', (snap) => {
-        tbody.innerHTML = "";
-        if (snap.exists()) {
-            let results = []; snap.forEach(child => results.push(child.val()));
-            results.reverse().forEach((data, index) => {
-                const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
-                tbody.innerHTML += `<tr><td>${medal}</td><td>${data.nickname}</td><td style="text-align: right;">${data.formattedTime}</td></tr>`;
-            });
-        } else {
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No data yet</td></tr>';
-        }
-    });
-}
-
-// --- 5. UI ACTIONS (Download, Share, QR, Modals) ---
-function setupDownloadAndShare(imgUrl) {
-    document.getElementById('downloadBtn').onclick = () => {
-        const link = document.createElement('a'); link.download = `UCforU_${currentNickname}.png`; link.href = imgUrl; link.click();
-    };
-
-    document.getElementById('shareBtn').onclick = async () => {
-        try {
-            const blob = await (await fetch(imgUrl)).blob();
-            const file = new File([blob], "DigitalRhythm.png", { type: "image/png" });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({ files: [file], title: 'My Digital Rhythm', url: 'https://ucforu.online' });
-            } else alert("Share feature not supported on this device.");
-        } catch (e) { console.error(e); }
-    };
-}
-
-function generateMyQR() {
-    const qrContainer = document.getElementById("qrcode-container");
-    if(qrContainer) {
-        qrContainer.innerHTML = "";
-        new QRCode(qrContainer, { text: "https://ucforu.online", width: 130, height: 130 });
-    }
-}
-generateMyQR();
-
-function showToast(message, type = "info") {
-    const container = document.getElementById("toast-container");
-    const toast = document.createElement("div");
-    toast.className = "toast " + type;
-    toast.innerHTML = `<div class="toast-icon">${type === "success" ? "✅" : type === "error" ? "❌" : "ℹ️"}</div><div>${message}</div>`;
-    container.appendChild(toast);
-    setTimeout(() => toast.classList.add("show"), 100);
-    setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 400); }, 3000);
-}
-
-// --- 6. PAGE LOAD: Auto Popup & Challenge Link ---
-window.addEventListener("DOMContentLoaded", () => {
-    const params = new URLSearchParams(window.location.search);
-    window.challengeID = params.get("challenge");
-    const guideModal = document.getElementById('guideModal');
-
-    // Load Challenge Data if Link is opened
-    if (window.challengeID && database) {
-        const banner = document.createElement("div");
-        banner.style.cssText = "background:rgba(0,0,0,0.3); padding:15px; border-radius:12px; margin-bottom:20px; text-align:center;";
-        banner.innerHTML = `<h3>⚔️ Loading challenge...</h3>`;
-        document.querySelector("main").prepend(banner);
-
-        database.ref("challenges/" + window.challengeID).once("value").then((snap) => {
-            if (snap.exists()) {
-                window.challengeData = snap.val();
-                banner.innerHTML = `<h3>⚔️ Challenge From ${window.challengeData.creator}</h3><p>Screen Time: ${Math.floor(window.challengeData.creatorTime/60)}h ${window.challengeData.creatorTime%60}m</p><p>Upload your screenshot to beat this score 🏆</p>`;
-                if (guideModal) guideModal.querySelector("h2").innerHTML = "Accept Challenge! ⚔️";
-            } else {
-                banner.innerHTML = `<h3>Challenge not found</h3>`;
-            }
-        });
-    }
-
-    // AUTO POPUP LOGIC
-    if (guideModal) {
-        // Agar pehli baar aaya hai ya challenge link par click kiya hai
-        if (window.challengeID || !localStorage.getItem('guideShown')) {
-            setTimeout(() => { guideModal.style.display = 'flex'; }, 1000);
-        }
-
-        // Close Guide (Ab baar baar nahi dikhega next refresh par)
-        document.getElementById('closeGuide').onclick = () => { 
-            guideModal.style.display = 'none'; 
-            localStorage.setItem('guideShown', 'true'); 
-        };
-        
-        // Background click se band karna
-        window.onclick = (event) => { if (event.target == guideModal) { guideModal.style.display = "none"; localStorage.setItem('guideShown', 'true'); } };
-    }
-
-    // Modal Tabs Logic
-    const tabAndroid = document.getElementById('tabAndroid'), tabIphone = document.getElementById('tabIphone');
-    const contentAndroid = document.getElementById('contentAndroid'), contentIphone = document.getElementById('contentIphone');
-    if (tabAndroid && tabIphone) {
-        tabAndroid.onclick = () => { contentAndroid.style.display = 'block'; contentIphone.style.display = 'none'; tabAndroid.className = 'primary'; tabIphone.className = 'secondary'; };
-        tabIphone.onclick = () => { contentAndroid.style.display = 'none'; contentIphone.style.display = 'block'; tabAndroid.className = 'secondary'; tabIphone.className = 'primary'; };
-    }
-
-    // Challenge Friend Button Create Logic
-    const challengeBtn = document.getElementById("challengeBtn");
-    if (challengeBtn) {
-        challengeBtn.addEventListener("click", async () => {
-            try {
-                const newChallengeID = btoa(currentNickname + Date.now()).replace(/=/g,"");
-                const challengeLink = `${location.origin}${location.pathname}?challenge=${newChallengeID}`;
-                if (database) database.ref("challenges/" + newChallengeID).set({ creator: currentNickname, creatorTime: currentUserTime, timestamp: firebase.database.ServerValue.TIMESTAMP });
-                
-                if (navigator.share) {
-                    await navigator.share({ title: "Screen Time Challenge", text: `⚔️ ${currentNickname} challenged you!\nMy screen time: ${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m\nCan you beat me? 😎\n\n${challengeLink}` });
-                } else {
-                    navigator.clipboard.writeText(challengeLink); showToast("Challenge link copied 🔥", "success");
-                }
-            } catch (err) { console.error("Challenge failed"); }
-        });
-    }
-});
+    database.ref('leaderboard/' + dailyKey).orderByChild('totalMinutes').limitToLast(10
