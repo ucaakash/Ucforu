@@ -3,12 +3,12 @@ module.exports = async (req, res) => {
 
   try {
     const { imageBase64 } = req.body;
-    // API key ko trim kar rahe hain taki koi extra space link na kharab kare
+    // Key ko trim karna zaroori hai
     const apiKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : null;
 
-    if (!apiKey) return res.status(500).json({ error: 'API Key Missing in Vercel!' });
+    if (!apiKey) return res.status(500).json({ error: 'Vercel Settings mein Key nahi mili' });
 
-    // Is baar v1beta aur models/gemini-1.5-flash ka ekdum fresh link
+    // AI Studio ke liye sabse stable link (v1beta)
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(apiUrl, {
@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: "Analyze this screen time screenshot. Return ONLY JSON: {\"isRealScreenshot\":true, \"hours\":5, \"minutes\":30, \"shayari\":\"hindi roast\"}" },
+            { text: "Analyze this screen time image. Return ONLY a JSON: {\"isRealScreenshot\":true, \"hours\":5, \"minutes\":30, \"shayari\":\"hindi roast\"}" },
             { inline_data: { mime_type: "image/jpeg", data: imageBase64.split(',')[1] } }
           ]
         }]
@@ -25,21 +25,24 @@ module.exports = async (req, res) => {
     });
 
     const data = await response.json();
-    console.log("Gemini Status:", response.status);
 
+    // AGAR ERROR AAYE: Toh hum poora message dikhayenge
     if (data.error) {
-      console.error("Gemini Error Detail:", JSON.stringify(data.error));
-      // Agar model nahi mil raha, toh Gemini khud bata dega kyun
-      return res.status(500).json({ error: data.error.message });
+      console.error("GOOGLE ERROR:", data.error.message);
+      return res.status(response.status).json({ error: data.error.message });
     }
 
-    let aiText = data.candidates[0].content.parts[0].text;
-    aiText = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
-    
-    res.status(200).json(JSON.parse(aiText));
+    // Response parse karna
+    if (data.candidates && data.candidates[0]) {
+      let aiText = data.candidates[0].content.parts[0].text;
+      aiText = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
+      return res.status(200).json(JSON.parse(aiText));
+    }
+
+    throw new Error("AI ne koi response nahi diya");
 
   } catch (err) {
-    console.error("Crash Error:", err.message);
+    console.error("BACKEND CRASH:", err.message);
     res.status(500).json({ error: "Server Busy: " + err.message });
   }
 };
