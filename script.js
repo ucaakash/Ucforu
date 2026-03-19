@@ -81,7 +81,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         document.getElementById('processing').style.display = 'none';
         document.getElementById('result').style.display = 'block';
 
-        // âš”ï¸ VS Battle Result
+        // ⚔️ VS Battle Result
         if(window.challengeData){
             let creatorTime = window.challengeData.creatorTime;
             let winner = currentUserTime > creatorTime ? currentNickname : window.challengeData.creator;
@@ -107,12 +107,12 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
                         <div class="player-time">${userH}h ${userM}m</div>
                     </div>
                 </div>
-                <div class="winner-text">ðŸ‘‘ Winner: ${winner}</div>
+                <div class="winner-text">👑 Winner: ${winner}</div>
             `;
 
             document.getElementById("result").prepend(card);
 
-            const flowers=["ðŸŒ¸","ðŸ’","ðŸŒ¹"];
+            const flowers=["🌸","💐","🌹"];
             for(let i=0;i<8;i++){
                 let f=document.createElement("div");
                 f.className="flower";
@@ -204,7 +204,7 @@ function loadLeaderboard() {
             results.reverse();
             
             results.forEach((data, index) => {
-                const medal = index === 0 ? "ðŸ¥‡" : index === 1 ? "ðŸ¥ˆ" : index === 2 ? "ðŸ¥‰" : (index + 1);
+                const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
                 tbody.innerHTML += `<tr>
                     <td>${medal}</td>
                     <td>${data.nickname}</td>
@@ -257,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             canvasImg.toBlob(async (blob)=>{
                 const file = new File([blob], "ChallengeCard.png", {type:"image/png"});
-                const shareText = `âš”ï¸ ${currentNickname} challenged you!\n\nMy screen time: ${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m\n\nCan you beat me? ðŸ˜Ž\n\n${challengeLink}`;
+                const shareText = `⚔️ ${currentNickname} challenged you!\n\nMy screen time: ${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m\n\nCan you beat me? 😎\n\n${challengeLink}`;
 
                 // Fixed the Missing If condition here
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -269,7 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                 } else {
                     navigator.clipboard.writeText(challengeLink);
-                    showToast("Challenge link copied ðŸ”¥", "success");
+                    showToast("Challenge link copied 🔥", "success");
                 }
             });
 
@@ -293,7 +293,7 @@ window.addEventListener("DOMContentLoaded", () => {
         banner.style.textAlign = "center";
         
         banner.innerHTML = `
-        <h3>âš”ï¸ Friend Challenge</h3>
+        <h3>⚔️ Friend Challenge</h3>
         <p>Loading challenge...</p>
         `;
         
@@ -304,9 +304,9 @@ window.addEventListener("DOMContentLoaded", () => {
                 const data = snap.val();
                 window.challengeData = data;
                 banner.innerHTML = `
-                <h3>âš”ï¸ Challenge From ${data.creator}</h3>
+                <h3>⚔️ Challenge From ${data.creator}</h3>
                 <p>Screen Time: ${Math.floor(data.creatorTime/60)}h ${data.creatorTime%60}m</p>
-                <p>Upload your screenshot to beat this score ðŸ†</p>
+                <p>Upload your screenshot to beat this score 🏆</p>
                 `;
             }else{
                 banner.innerHTML = `<h3>Challenge not found</h3>`;
@@ -320,9 +320,9 @@ function showToast(message, type = "info") {
     const toast = document.createElement("div");
     toast.className = "toast " + type;
 
-    let icon = "â„¹ï¸";
-    if(type === "success") icon = "âœ…";
-    if(type === "error") icon = "âŒ";
+    let icon = "ℹ️";
+    if(type === "success") icon = "✅";
+    if(type === "error") icon = "❌";
 
     toast.innerHTML = `
         <div class="toast-icon">${icon}</div>
@@ -406,7 +406,7 @@ window.addEventListener("DOMContentLoaded", () => {
     // 2. Challenge Title Change (Agar link se aaya hai)
     if(challengeID) {
         const guideTitle = document.querySelector("#guideModal h2");
-        if(guideTitle) guideTitle.innerHTML = "Accept Challenge! âš”ï¸";
+        if(guideTitle) guideTitle.innerHTML = "Accept Challenge! ⚔️";
     }
 
     // 3. Tab & Close Logic (Jo pehle diya tha)
