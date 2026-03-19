@@ -218,87 +218,20 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     }
 });
 function parseScreentime(text) {
-
-    if (!text) return { hours: 0, minutes: 0, totalMinutes: 0 };
-
-    let clean = text.toLowerCase();
-
-    // 🔧 STEP 1: OCR Fix
-    clean = clean
-        .replace(/\s+/g, ' ')
-        .replace(/[|!]/g, '1')
-        .replace(/l/g, '1')
-        .replace(/o/g, '0');
-
-    // Normalize words
-    clean = clean
-        .replace(/hours?/g, 'h')
-        .replace(/mins?|minutes?/g, 'm');
-
-    console.log("CLEAN TEXT:", clean);
-
-    // 🔥 STEP 2: Priority detection (most accurate cases)
-
-    let priorityMatch =
-        clean.match(/daily average.*?(\d{1,2})\s*h\s*(\d{1,2})?\s*m?/) ||
-        clean.match(/screen time.*?(\d{1,2})\s*h\s*(\d{1,2})?\s*m?/) ||
-        clean.match(/total.*?(\d{1,2})\s*h\s*(\d{1,2})?\s*m?/);
-
-    if (priorityMatch) {
-        let h = parseInt(priorityMatch[1]) || 0;
-        let m = parseInt(priorityMatch[2]) || 0;
-
-        if (h <= 24 && m < 60) {
-            return {
-                hours: h,
-                minutes: m,
-                totalMinutes: h * 60 + m
-            };
-        }
+    let hours = 0, minutes = 0;
+    const cleanText = text.toLowerCase().replace(/\s+/g, ' ');
+    const match1 = cleanText.match(/(\d+)\s*h\s*(\d+)\s*m/);
+    const match2 = cleanText.match(/(\d+)\s*hours?\s*(\d+)\s*min/);
+    if (match1) { hours = parseInt(match1[1]); minutes = parseInt(match1[2]); }
+    else if (match2) { hours = parseInt(match2[1]); minutes = parseInt(match2[2]); }
+    else {
+        const hMatch = cleanText.match(/(\d+)\s*(h|hour)/);
+        const mMatch = cleanText.match(/(\d+)\s*(m|min)/);
+        if(hMatch) hours = parseInt(hMatch[1]);
+        if(mMatch) minutes = parseInt(mMatch[1]);
     }
-
-    // 🔥 STEP 3: Find ALL matches
-    const matches = [...clean.matchAll(/(\d{1,2})\s*h\s*(\d{1,2})?\s*m?/g)];
-
-    console.log("ALL MATCHES:", matches);
-
-    if (matches.length === 0) {
-        return { hours: 0, minutes: 0, totalMinutes: 0 };
-    }
-
-    // 🔥 STEP 4: Smart scoring system
-    let best = { score: 0, hours: 0, minutes: 0 };
-
-    matches.forEach(m => {
-        let h = parseInt(m[1]) || 0;
-        let min = parseInt(m[2]) || 0;
-
-        if (h > 24 || min >= 60) return;
-
-        let total = h * 60 + min;
-
-        // 💡 scoring logic
-        let score = total;
-
-        // boost realistic range (2h–12h)
-        if (h >= 2 && h <= 12) score += 200;
-
-        // penalize very low values
-        if (h <= 1) score -= 100;
-
-        // penalize extreme values
-        if (h > 15) score -= 50;
-
-        if (score > best.score) {
-            best = { score, hours: h, minutes: min };
-        }
-    });
-
-    return {
-        hours: best.hours,
-        minutes: best.minutes,
-        totalMinutes: best.hours * 60 + best.minutes
-    };
+    hours = isNaN(hours) ? 0 : hours; minutes = isNaN(minutes) ? 0 : minutes;
+    return { hours, minutes, totalMinutes: (hours * 60) + minutes };
 }
 
 function loadLeaderboard() {
