@@ -4,141 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UCforU - Viral Screen Time Card</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-
     <link rel="stylesheet" href="style.css">
 </head>
-<p id="guideBtn" style="color: #ffeaa7; cursor: pointer; text-decoration: underline; margin-top: 10px; font-size: 0.9rem; text-align: center;">
-    How to take a screenshot?(Guide)❤️❤️
-</p>
+<body>
 
-<div id="guideModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
-    <div class="glass-card" style="position: relative; max-width: 400px; width: 100%; margin: 0; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);">
-        <span id="closeGuide" style="position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: white;">&times;</span>
-        
+<p id="guideBtn">How to take a screenshot?(Guide) ❤️❤️</p>
+
+<div id="guideModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
+    <div class="glass-card">
+        <span id="closeGuide" style="position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer;">&times;</span>
         <h2 style="text-align: center; margin-bottom: 20px;">How to Check ⏳</h2>
-        
         <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <button id="tabAndroid" class="primary" style="padding: 10px; margin: 0; font-size: 1rem;">Android</button>
-            <button id="tabIphone" class="secondary" style="padding: 10px; margin: 0; font-size: 1rem;">iPhone</button>
+            <button id="tabAndroid" class="primary" style="padding: 10px;">Android</button>
+            <button id="tabIphone" class="secondary" style="padding: 10px;">iPhone</button>
         </div>
-
-        <div id="contentAndroid" style="text-align: left; line-height: 1.6;">
-            <ol style="padding-left: 20px;">
-                <li> Go to the phone's <b>Settings</b></li>
-                <li>Search <b>Digital Wellbeing & Screen Time.</b></li>
-                <li>Take <b>Screenshot</b> on Today Time.</li>
-            </ol>
-        </div>
-
-        <div id="contentIphone" style="display: none; text-align: left; line-height: 1.6;">
-            <ol style="padding-left: 20px;">
-                <li>Go To iPhone <b>Settings</b>.</li>
-                <li>Search <b>Screen Time</b>.</li>
-                <li>Click On <b>See All Activity</b> And Take <b>Screenshot</b> .</li>
-            </ol>
-        </div>
-        
-        <button onclick="document.getElementById('guideModal').style.display='none'" class="primary" style="margin-top: 20px; padding: 10px;">Got it!</button>
+        <div id="contentAndroid"><ol style="padding-left:20px;"><li>Settings jao</li><li>Digital Wellbeing search karo</li><li>Today's Time ka screenshot lo</li></ol></div>
+        <div id="contentIphone" style="display:none;"><ol style="padding-left:20px;"><li>Settings > Screen Time</li><li>See All Activity</li><li>Screenshot lo</li></ol></div>
+        <button onclick="document.getElementById('guideModal').style.display='none'" class="primary" style="margin-top:20px;">Got it!</button>
     </div>
 </div>
 
-<body>
-
 <header>
     <h1>UCforu</h1>
-    <p>Create & Share Your Digital </p>
+    <p>Create & Share Your Digital</p>
 </header>
-<div id="toast-container"></div>
-<main style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-    
+
+<main>
     <div id="inputForm" class="glass-card">
-        <div class="input-group">
-            <label for="nickname">Your Name</label>
-            <input type="text" id="nickname" placeholder="Ex..Akash">
-        </div>
-        <div class="input-group">
-            <label for="screenshot">Upload Screen Time Image</label>
-            <input type="file" id="screenshot" accept="image/png, image/jpeg, image/webp">
-        </div>
-        <button id="analyzeBtn" class="primary">Reveal My Digital Self✨</button>
+        <label>Your Name</label>
+        <input type="text" id="nickname" placeholder="Ex..Akash" style="margin-bottom:20px;">
+        <label>Upload Screen Time Image</label>
+        <input type="file" id="screenshot" accept="image/*">
+        <button id="analyzeBtn" class="primary" style="margin-top:20px;">Reveal My Digital Self ✨</button>
     </div>
 
-    <div id="processing" class="glass-card">
-        <div class="spinner"></div>
-        <h2>Analyzing Image...</h2>
-        <p style="margin-top:10px; opacity:0.8;">Reading your digital self via AI...</p>
-    </div>
-
-    <div id="result" class="glass-card">
-        <h2>Your Card</h2>
-        <p style="margin-bottom: 20px; font-size: 0.9rem;">Long press image to save, or use button below.</p>
-        
-        <img id="generated-image-preview" src="" alt="Your Screen Time Card">
-
+    <div id="result" class="glass-card" style="display:none; text-align:center;">
+        <img id="generated-image-preview" src="" alt="Card">
         <button id="downloadBtn" class="primary">Download Card ⬇️</button>
-        <button id="shareBtn" class="secondary" style="background: rgba(255,255,255,0.2); color: white;">Share Link 🔗</button>
-      <button id="challengeBtn" class="secondary" style="background: rgba(255,255,255,0.2); color: white;">Challenge Friends ⚔️</button>  
-        <button onclick="location.reload()" style="background:none; border:none; color:white; margin-top:10px; text-decoration: underline;">Create Another</button>
+        <button id="shareBtn" class="secondary">Share Link 🔗</button>
+        <button id="challengeBtn" class="secondary">Challenge Friends ⚔️</button>
     </div>
 
     <div id="leaderboard" class="glass-card">
         <h2 style="text-align: center;">🏆 Leaderbord (Today)</h2>
         <table class="leaderboard-table">
-            <thead>
-                <tr>
-                    <th class="rank">#</th>
-                    <th>Name</th>
-                    <th class="time">Time</th>
-                </tr>
-            </thead>
-            <tbody id="leaderboardBody">
-                <tr><td colspan="3" style="text-align:center;">Loading...</td></tr>
-            </tbody>
+            <tbody id="leaderboardBody"></tbody>
         </table>
     </div>
-<div class="credit">
-Design by ❤️ 
-<a href="https://www.instagram.com/uc.akash?igsh=MXRqc2NpaDJ4dHY4dA==" target="_blank">
-Uc.Akash
-</a> ❤️
-</div>
 </main>
 
 <div id="card-render-container">
     <div id="instagram-card" class="instagram-card">
-        <div class="floral-top">🌿</div>
-        
-        <div class="card-header-icon">🌸</div>
         <div class="card-title">SCREEN TIME</div>
-        <div class="card-subtitle">Thank You for Your Coming</div>
-        
         <div class="card-name" id="render-name">Name</div>
-        <div class="card-time" id="render-time">0h 0m screen time</div>
-        
-        <div class="card-shayari" id="render-shayari">Shayari goes here</div>
-        
-        <div class="card-divider">❤️─────💐─────❤️</div>
-        <div class="card-footer">ucforu.online<br>
-        <span style="font-size: 50px; margin-top:50px; display:inline-block;">🌸</span></div>
-         <br>=	 <div id="viral-card">
-    <div id="qrcode-container"></div> 
-</div>
-
-        <div class="floral-bottom">🌿</div>
+        <div class="card-time" id="render-time">0h 0m</div>
+        <div class="card-shayari" id="render-shayari"></div>
+        <div id="qrcode-container"></div>
     </div>
 </div>
 
 <script src="script.js"></script>
-
 </body>
 </html>
