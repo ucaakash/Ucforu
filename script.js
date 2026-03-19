@@ -19,7 +19,9 @@ try {
     database = firebase.database();
     console.log("Firebase initialized successfully");
     loadLeaderboard();
-} catch (error) { console.error("Firebase init error:", error); }
+} catch (error) { 
+    console.error("Firebase init error:", error); 
+}
 
 // --- IMAGE COMPRESSOR (Vercel limits bachane ke liye) ---
 function compressImage(file) {
@@ -32,13 +34,12 @@ function compressImage(file) {
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                // Resize while keeping aspect ratio
                 const maxWidth = 800;
                 const scaleSize = maxWidth / img.width;
                 canvas.width = maxWidth;
                 canvas.height = img.height * scaleSize;
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                resolve(canvas.toDataURL('image/jpeg', 0.7)); // Compress to 70% quality JPEG
+                resolve(canvas.toDataURL('image/jpeg', 0.7)); 
             };
         };
     });
@@ -58,10 +59,8 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     document.getElementById('processing').style.display = 'block';
 
     try {
-        // Image ko compress karke base64 banayenge
         const base64Image = await compressImage(file);
 
-        // Vercel Backend par bhejenge (Gemini AI ke paas)
         const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -72,19 +71,16 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         
         const aiData = await response.json();
 
-        // Security Checks from AI
         if (aiData.isOwnCard) throw new Error("OWN_CARD");
         if (!aiData.isRealScreenshot) throw new Error("FAKE_PHOTO");
         
         const totalMinutes = (aiData.hours * 60) + aiData.minutes;
         if (totalMinutes === 0) throw new Error("INVALID_TIME");
 
-        // Success Flow
         currentUserTime = totalMinutes;
         currentNickname = nickname;
         const timeString = `${aiData.hours}h ${aiData.minutes}m`;
 
-        // Update Card UI (Custom Shayari directly from Gemini AI)
         document.getElementById('render-name').innerText = nickname;
         document.getElementById('render-time').innerText = `${timeString} screen time`;
         document.getElementById('render-shayari').innerText = `"${aiData.shayari}"`;
@@ -98,7 +94,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         document.getElementById('processing').style.display = 'none';
         document.getElementById('result').style.display = 'block';
 
-        // Firebase & Challenge Logics
         saveLeaderboardData(timeString);
         setupDownloadAndShare(imageDataUrl);
         if (window.challengeData) handleBattleResult();
@@ -140,24 +135,23 @@ function handleBattleResult() {
     }
 }
 
-// 🐛 BUG FIX: Yahan btoa() hata diya hai taaki emojis se crash na ho
+// 🔥 BUG FIX 1: Emojis/Hindi se crash nahi hoga
 function saveLeaderboardData(timeString) {
     if (database) {
         const dailyKey = new Date().toISOString().split('T')[0];
         const safeName = currentNickname.replace(/[^a-zA-Z0-9]/g, "User"); 
         const userKey = safeName + "_" + Date.now();
         
-        console.log("Leaderboard Save Data:", { nickname: currentNickname, time: timeString });
-
         database.ref(`leaderboard/${dailyKey}/${userKey}`).set({ 
             nickname: currentNickname, 
             totalMinutes: currentUserTime, 
             formattedTime: timeString,
             timestamp: firebase.database.ServerValue.TIMESTAMP
-        }).catch((err) => console.error("Firebase Save Error:", err));
+        }).catch(err => console.error("Firebase Save Error:", err));
     }
 }
 
+// 🔥 BUG FIX 2: 1 user wala issue solved (Curly braces lagaye hain)
 function loadLeaderboard() {
     if (!database) return;
     const dailyKey = new Date().toISOString().split('T')[0];
@@ -166,7 +160,13 @@ function loadLeaderboard() {
     database.ref('leaderboard/' + dailyKey).orderByChild('totalMinutes').limitToLast(10).on('value', (snap) => {
         tbody.innerHTML = "";
         if (snap.exists()) {
-            let results = []; snap.forEach(child => results.push(child.val()));
+            let results = []; 
+            
+            // Yahan brackets {} bohot zaroori the loop chalane ke liye
+            snap.forEach((child) => { 
+                results.push(child.val()); 
+            });
+            
             results.reverse().forEach((data, index) => {
                 const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
                 tbody.innerHTML += `<tr><td>${medal}</td><td>${data.nickname}</td><td style="text-align: right;">${data.formattedTime}</td></tr>`;
@@ -253,7 +253,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (challengeBtn) {
         challengeBtn.addEventListener("click", async () => {
             try {
-                // 🐛 BUG FIX: Challenge link banane mein bhi btoa() hata diya
+                // 🔥 BUG FIX 3: Challenge link mein bhi emoji crash fix
                 const safeName = currentNickname.replace(/[^a-zA-Z0-9]/g, "User");
                 const newChallengeID = safeName + "_" + Date.now();
                 
