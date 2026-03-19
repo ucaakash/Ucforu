@@ -140,11 +140,21 @@ function handleBattleResult() {
     }
 }
 
+// 🐛 BUG FIX: Yahan btoa() hata diya hai taaki emojis se crash na ho
 function saveLeaderboardData(timeString) {
     if (database) {
         const dailyKey = new Date().toISOString().split('T')[0];
-        const userKey = btoa(currentNickname + navigator.userAgent).replace(/=/g,"");
-        database.ref(`leaderboard/${dailyKey}/${userKey}`).set({ nickname: currentNickname, totalMinutes: currentUserTime, formattedTime: timeString });
+        const safeName = currentNickname.replace(/[^a-zA-Z0-9]/g, "User"); 
+        const userKey = safeName + "_" + Date.now();
+        
+        console.log("Leaderboard Save Data:", { nickname: currentNickname, time: timeString });
+
+        database.ref(`leaderboard/${dailyKey}/${userKey}`).set({ 
+            nickname: currentNickname, 
+            totalMinutes: currentUserTime, 
+            formattedTime: timeString,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }).catch((err) => console.error("Firebase Save Error:", err));
     }
 }
 
@@ -243,16 +253,30 @@ window.addEventListener("DOMContentLoaded", () => {
     if (challengeBtn) {
         challengeBtn.addEventListener("click", async () => {
             try {
-                const newChallengeID = btoa(currentNickname + Date.now()).replace(/=/g,"");
+                // 🐛 BUG FIX: Challenge link banane mein bhi btoa() hata diya
+                const safeName = currentNickname.replace(/[^a-zA-Z0-9]/g, "User");
+                const newChallengeID = safeName + "_" + Date.now();
+                
                 const challengeLink = `${location.origin}${location.pathname}?challenge=${newChallengeID}`;
-                if (database) database.ref("challenges/" + newChallengeID).set({ creator: currentNickname, creatorTime: currentUserTime, timestamp: firebase.database.ServerValue.TIMESTAMP });
+                
+                if (database) {
+                    database.ref("challenges/" + newChallengeID).set({ 
+                        creator: currentNickname, 
+                        creatorTime: currentUserTime, 
+                        timestamp: firebase.database.ServerValue.TIMESTAMP 
+                    });
+                }
                 
                 if (navigator.share) {
-                    await navigator.share({ title: "Screen Time Challenge", text: `⚔️ ${currentNickname} challenged you!\nMy screen time: ${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m\nCan you beat me? 😎\n\n${challengeLink}` });
+                    await navigator.share({ 
+                        title: "Screen Time Challenge", 
+                        text: `⚔️ ${currentNickname} challenged you!\nMy screen time: ${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m\nCan you beat me? 😎\n\n${challengeLink}` 
+                    });
                 } else {
-                    navigator.clipboard.writeText(challengeLink); showToast("Challenge link copied 🔥", "success");
+                    navigator.clipboard.writeText(challengeLink); 
+                    showToast("Challenge link copied 🔥", "success");
                 }
-            } catch (err) { console.error("Challenge failed"); }
+            } catch (err) { console.error("Challenge failed", err); }
         });
     }
 });
