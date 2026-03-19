@@ -57,6 +57,19 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         const { data: { text } } = await Tesseract.recognize(file, 'eng');
         const cleanText = text.toLowerCase();
         
+        // --- 1. BLACKLIST CHECK (Hamara card reject karne ke liye) ---
+        const isOurOwnCard = cleanText.includes("ucforu") || 
+                             cleanText.includes("digital footprint") || 
+                             cleanText.includes("download card") ||
+                             cleanText.includes("your card");
+        
+        if (isOurOwnCard) {
+            document.getElementById('processing').style.display = 'none';
+            document.getElementById('inputForm').style.display = 'block';
+            showToast("This is card Image! 😂 Kindly Upload Real Image.", "error");
+            return; 
+        }
+        
         // --- ANTI-FAKE & TIME VALIDATION CHECK START ---
         // 1. Asli screenshot mein inme se koi ek word zaroor hoga
         const isRealScreenshot = cleanText.includes("screen time") || 
@@ -73,7 +86,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         if (!isRealScreenshot) {
             document.getElementById('processing').style.display = 'none';
             document.getElementById('inputForm').style.display = 'block';
-            showToast("Fake Screenshot Alert! 🚨 Asli photo daaliye.", "error");
+            showToast("Fake Screenshot Alert! 🚨 Kindly Upload RealI Image.", "error");
             return; 
         }
         
@@ -462,3 +475,4 @@ window.addEventListener("DOMContentLoaded", () => {
         };
     }
 });
+
