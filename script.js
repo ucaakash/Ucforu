@@ -241,6 +241,12 @@ window.addEventListener("DOMContentLoaded", () => {
         document.getElementById('closeGuide').onclick = () => { guideModal.style.display = 'none'; localStorage.setItem('guideShown', 'true'); };
         window.onclick = (event) => { if (event.target == guideModal) { guideModal.style.display = "none"; localStorage.setItem('guideShown', 'true'); } };
     }
+    // -- MANUAL OPEN GUIDE BUTTON --
+    const openGuideBtn = document.getElementById('openGuideBtn');
+    if (openGuideBtn && guideModal) {
+        openGuideBtn.onclick = () => { guideModal.style.display = 'flex'; };
+    }
+
 
     const tabAndroid = document.getElementById('tabAndroid'), tabIphone = document.getElementById('tabIphone');
     const contentAndroid = document.getElementById('contentAndroid'), contentIphone = document.getElementById('contentIphone');
