@@ -37,6 +37,9 @@
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: var(--surface); padding: 25px; border-radius: 16px; box-shadow: 0 4px 15px var(--shadow); border: 1px solid var(--border); position: relative; overflow: hidden; }
         .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: var(--primary); }
+        .stat-card.blue::before { background: var(--secondary); }
+        .stat-card.orange::before { background: var(--warning); }
+        .stat-card.green::before { background: var(--success); }
         .stat-card h3 { margin: 0; font-size: 32px; font-weight: 800; }
         .stat-card p { margin: 5px 0 0; color: var(--text-muted); font-size: 13px; font-weight: 600; text-transform: uppercase; }
 
@@ -47,6 +50,11 @@
         .addict-card p { margin: 5px 0 0; font-weight: bold; color: var(--primary); font-size: 14px;}
 
         .chart-container { background: var(--surface); padding: 20px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 30px; height: 300px; width: 100%; }
+        
+        /* 🔥 Added Search Box Style */
+        .controls { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
+        .search-box { padding: 12px 20px; width: 100%; max-width: 300px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 10px; outline: none; }
+
         .table-container { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow-x: auto; box-shadow: 0 4px 15px var(--shadow); width: 100%; }
         table { width: 100%; border-collapse: collapse; min-width: 600px; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
@@ -116,6 +124,10 @@
                 <div class="top-addicts" id="top-addicts-container"></div>
 
                 <div class="chart-container"><canvas id="trafficChart"></canvas></div>
+
+                <div class="controls">
+                    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search Nickname..." onkeyup="searchTable()">
+                </div>
 
                 <div class="table-container">
                     <table id="adminTable">
@@ -235,6 +247,15 @@
             });
         }
 
+        // 🔥 FIX: Search Table Logic
+        function searchTable() {
+            const input = document.getElementById("searchInput").value.toLowerCase();
+            document.querySelectorAll(".user-row").forEach(row => {
+                const name = row.querySelector(".user-name").innerText.toLowerCase();
+                row.style.display = name.includes(input) ? "" : "none";
+            });
+        }
+
         function updateChart(dataObj) {
             const ctx = document.getElementById('trafficChart').getContext('2d'); const labels = Object.keys(dataObj).sort().slice(-7); const vals = labels.map(d => dataObj[d]);
             if(trafficChartInstance) trafficChartInstance.destroy();
@@ -242,7 +263,7 @@
         }
         function deleteUser(d, u) { if(confirm("Delete this user?")) database.ref(`leaderboard/${d}/${u}`).remove(); }
         
-        // 🔥 4. THE NUKE BUTTON
+        // 4. THE NUKE BUTTON
         function nukeDatabase() {
             if(confirm("🚨 WARNING! You are about to DELETE ALL Leaderboard Data! Proceed?")) {
                 if(confirm("💣 100% SURE? This CANNOT BE UNDONE!")) {
