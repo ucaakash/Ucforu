@@ -3,139 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UCforU - Pro Admin Room 👑</title>
+    <title>UCforU - Ultra Pro Admin 👑</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h1 { color: #ff4757; margin-bottom: 5px; }
+        :root { --primary: #ff4757; --dark: #2f3542; --light: #f4f7f6; --success: #2ed573; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--light); margin: 0; color: #333; display: flex; height: 100vh; overflow: hidden; }
         
-        .stats-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; }
-        .stat-box { background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; min-width: 140px; border-bottom: 4px solid #ff4757; }
-        .stat-box h3 { margin: 0; font-size: 26px; color: #2f3542; }
-        .stat-box p { margin: 5px 0 0 0; color: #747d8c; font-size: 13px; font-weight: 600; }
+        /* Login Screen */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .login-box h2 { color: var(--primary); margin-top: 0; }
+        .login-box input { width: 100%; padding: 12px; margin: 15px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; outline: none; }
+        .login-box button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .login-box button:hover { background: #ff6b81; }
+
+        /* Dashboard Layout */
+        #dashboard { display: none; width: 100%; height: 100%; }
+        .sidebar { width: 250px; background: white; box-shadow: 2px 0 10px rgba(0,0,0,0.05); padding: 20px 0; display: flex; flex-direction: column; }
+        .logo { text-align: center; font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 30px; letter-spacing: 1px; }
+        .nav-btn { padding: 15px 25px; border: none; background: none; width: 100%; text-align: left; font-size: 16px; font-weight: 500; color: #747d8c; cursor: pointer; transition: 0.2s; border-left: 4px solid transparent; }
+        .nav-btn:hover { background: #f1f2f6; color: var(--dark); }
+        .nav-btn.active { background: #f1f2f6; color: var(--primary); border-left-color: var(--primary); }
+        .nav-btn i { width: 25px; }
+
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h1 { margin: 0; font-size: 28px; color: var(--dark); }
         
-        .controls { max-width: 1000px; margin: 0 auto 15px auto; display: flex; justify-content: space-between; gap: 10px; }
-        .search-box { padding: 10px 15px; width: 100%; max-width: 300px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; outline: none; }
-        .export-btn { background: #2ed573; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .export-btn:hover { background: #26b360; }
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-bottom: 4px solid var(--primary); }
+        .stat-card.blue { border-color: #3742fa; }
+        .stat-card.green { border-color: var(--success); }
+        .stat-card.orange { border-color: #ffa502; }
+        .stat-card h3 { margin: 0; font-size: 32px; color: var(--dark); }
+        .stat-card p { margin: 5px 0 0; color: #747d8c; font-size: 14px; font-weight: 600; text-transform: uppercase; }
+
+        /* Chart Section */
+        .chart-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; height: 300px; }
+
+        /* Table Section */
+        .controls { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 15px; }
+        .search-box { padding: 10px 15px; width: 100%; max-width: 300px; border: 1px solid #ccc; border-radius: 8px; outline: none; }
+        .export-btn { background: var(--success); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
         
-        table { width: 100%; max-width: 1000px; margin: 0 auto; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .table-container { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f2f6; }
-        th { background-color: #2f3542; color: white; font-weight: 500; }
+        th { background-color: #f8f9fa; color: var(--dark); font-weight: 600; text-transform: uppercase; font-size: 13px; }
         tr:hover { background-color: #f8f9fa; }
-        
-        .delete-btn { background: #ff4757; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
-        .delete-btn:hover { background: #ff6b81; }
-        
-        #access-denied { display: none; text-align: center; margin-top: 100px; color: #ff4757; }
-        #admin-panel { display: none; }
+        .delete-btn { background: #ff4757; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
+
+        /* Toast */
+        #toast { visibility: hidden; min-width: 250px; background-color: var(--dark); color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-weight: 500; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+        @keyframes fadeout { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
     </style>
 </head>
 <body>
 
-    <div id="access-denied">
-        <h1>❌ Access Denied</h1>
-        <p>Bhai, galat password! Tum admin nahi lagte.</p>
+    <div id="login-screen">
+        <div class="login-box">
+            <h2><i class="fa-solid fa-shield-halved"></i> Admin Login</h2>
+            <p style="color: #747d8c; font-size: 14px;">Enter master password to access dashboard</p>
+            <input type="password" id="adminPass" placeholder="Password" onkeypress="if(event.key === 'Enter') checkLogin()">
+            <button onclick="checkLogin()">Login</button>
+            <p id="login-error" style="color: red; display: none; margin-top: 10px; font-size: 14px;">Incorrect Password!</p>
+        </div>
     </div>
 
-    <div id="admin-panel">
-        <div class="header">
-            <h1>👑 UCforU Pro Admin</h1>
-            <p>Master Control Room - Handle your traffic like a boss!</p>
+    <div id="dashboard">
+        <div class="sidebar">
+            <div class="logo">UCforU 👑</div>
+            <button class="nav-btn active"><i class="fa-solid fa-chart-pie"></i> Overview</button>
+            <button class="nav-btn" onclick="alert('Abhi focus overview pe rakho bhai! Sunday launch ke baad aayega ye.')"><i class="fa-solid fa-users"></i> Users Data</button>
+            <button class="nav-btn" onclick="exportToCSV()"><i class="fa-solid fa-download"></i> Export Data</button>
+            <button class="nav-btn" onclick="location.reload()" style="margin-top: auto; color: #ff4757;"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
         </div>
 
-        <div class="stats-container">
-            <div class="stat-box">
-                <h3 id="total-users">0</h3>
-                <p>Total Cards</p>
+        <div class="main-content">
+            <div class="header">
+                <h1>Dashboard Overview</h1>
+                <div style="color: #747d8c; font-weight: 500;"><i class="fa-regular fa-clock"></i> Live Updates Active</div>
             </div>
-            <div class="stat-box">
-                <h3 id="today-users">0</h3>
-                <p>Today's Cards</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="total-users">0</h3>
+                    <p>Total Cards Generated</p>
+                </div>
+                <div class="stat-card blue">
+                    <h3 id="today-users">0</h3>
+                    <p>Cards Today</p>
+                </div>
+                <div class="stat-card orange">
+                    <h3 id="avg-time">0h 0m</h3>
+                    <p>Avg. Screen Time</p>
+                </div>
+                <div class="stat-card green">
+                    <h3 id="total-challenges">0</h3>
+                    <p>Total Challenges</p>
+                </div>
             </div>
-            <div class="stat-box" style="border-bottom-color: #3742fa;">
-                <h3 id="total-challenges">0</h3>
-                <p>Total Challenges</p>
+
+            <div class="chart-container">
+                <canvas id="trafficChart"></canvas>
+            </div>
+
+            <div class="controls">
+                <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search by Nickname..." onkeyup="searchTable()">
+                <button class="export-btn" onclick="exportToCSV()"><i class="fa-solid fa-file-csv"></i> Download CSV</button>
+            </div>
+
+            <div class="table-container">
+                <table id="adminTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Nickname</th>
+                            <th>Time (Min)</th>
+                            <th>Formatted Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminBody">
+                        <tr><td colspan="5" style="text-align: center;">Loading secure data...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-
-        <div class="controls">
-            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search User by Name..." onkeyup="searchTable()">
-            <button class="export-btn" onclick="exportToCSV()">📥 Download Data (CSV)</button>
-        </div>
-
-        <table id="adminTable">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Name</th>
-                    <th>Screen Time (Min)</th>
-                    <th>Formatted Time</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="adminBody">
-                <tr><td colspan="5" style="text-align: center;">Loading data...</td></tr>
-            </tbody>
-        </table>
     </div>
+
+    <div id="toast">Message goes here</div>
 
     <script>
-        // 🔐 SECURITY CHECK 
-        const password = prompt("Admin Password batao bhai:");
-        if (password !== "Akash@2026") {
-            document.getElementById("access-denied").style.display = "block";
-            throw new Error("Wrong Password");
-        } else {
-            document.getElementById("admin-panel").style.display = "block";
+        // 🔐 Login Logic
+        function checkLogin() {
+            const pass = document.getElementById('adminPass').value;
+            if (pass === "Akash@2026") {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'flex';
+                initFirebaseAndLoadData();
+                showToast("Welcome Boss! Login Successful ✅");
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+            }
         }
 
-        // --- Firebase Configuration ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyCeJWTbIF3mD43ihcoCZJ8LO-b896-FWa4",
-            authDomain: "ucforu-730a7.firebaseapp.com",
-            projectId: "ucforu-730a7",
-            storageBucket: "ucforu-730a7.firebasestorage.app",
-            messagingSenderId: "315045659904",
-            appId: "1:315045659904:web:2e1700a51aae71a8a29fe5",
-            measurementId: "G-899BZCPKR2",
-            databaseURL: "https://ucforu-730a7-default-rtdb.firebaseio.com"
-        };
+        function showToast(msg) {
+            const toast = document.getElementById("toast");
+            toast.innerText = msg;
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
 
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        let database;
+        let trafficChartInstance = null;
 
-        // 📊 Fetch and Display Data
-        function loadAdminData() {
-            const tbody = document.getElementById('adminBody');
-            const todayDate = new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0') + '-' + String(new Date().getDate()).padStart(2, '0');
-            
-            // Load Challenges Count
+        // 🚀 Initialize Everything after Login
+        function initFirebaseAndLoadData() {
+            const firebaseConfig = {
+                apiKey: "AIzaSyCeJWTbIF3mD43ihcoCZJ8LO-b896-FWa4",
+                authDomain: "ucforu-730a7.firebaseapp.com",
+                projectId: "ucforu-730a7",
+                storageBucket: "ucforu-730a7.firebasestorage.app",
+                messagingSenderId: "315045659904",
+                appId: "1:315045659904:web:2e1700a51aae71a8a29fe5",
+                measurementId: "G-899BZCPKR2",
+                databaseURL: "https://ucforu-730a7-default-rtdb.firebaseio.com"
+            };
+
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            database = firebase.database();
+
+            // Load Challenges
             database.ref('challenges').on('value', (snap) => {
                 document.getElementById('total-challenges').innerText = snap.exists() ? Object.keys(snap.val()).length : 0;
             });
 
-            // Load Leaderboard Data
+            // Load Leaderboard Data & Process Analytics
             database.ref('leaderboard').on('value', (snapshot) => {
+                const tbody = document.getElementById('adminBody');
                 tbody.innerHTML = "";
+                
                 let totalCount = 0;
                 let todayCount = 0;
+                let totalMinutesSum = 0;
+                
+                // For Chart Data
+                const datesCount = {}; 
+                const todayDate = new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0') + '-' + String(new Date().getDate()).padStart(2, '0');
 
                 if (snapshot.exists()) {
                     const allData = snapshot.val();
                     
                     Object.keys(allData).reverse().forEach(dateKey => {
                         const usersInDate = allData[dateKey];
-                        
+                        datesCount[dateKey] = Object.keys(usersInDate).length; // Save count for chart
+
                         Object.keys(usersInDate).forEach(userKey => {
                             const userData = usersInDate[userKey];
                             totalCount++;
+                            totalMinutesSum += parseInt(userData.totalMinutes || 0);
                             if(dateKey === todayDate) todayCount++;
 
                             tbody.innerHTML += `
@@ -143,16 +221,23 @@
                                     <td>${dateKey}</td>
                                     <td class="user-name"><strong>${userData.nickname}</strong></td>
                                     <td>${userData.totalMinutes}</td>
-                                    <td>${userData.formattedTime}</td>
-                                    <td>
-                                        <button class="delete-btn" onclick="deleteEntry('${dateKey}', '${userKey}')">🗑️ Delete</button>
-                                    </td>
+                                    <td><span style="background:#f1f2f6; padding:4px 8px; border-radius:4px; font-weight:600;">${userData.formattedTime}</span></td>
+                                    <td><button class="delete-btn" onclick="deleteEntry('${dateKey}', '${userKey}')"><i class="fa-solid fa-trash"></i></button></td>
                                 </tr>
                             `;
                         });
                     });
+
+                    // Calculate Average Time
+                    if (totalCount > 0) {
+                        const avgMins = Math.floor(totalMinutesSum / totalCount);
+                        document.getElementById('avg-time').innerText = Math.floor(avgMins / 60) + "h " + (avgMins % 60) + "m";
+                    }
+
+                    updateChart(datesCount);
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Abhi tak koi data nahi aaya bhai.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px; color:#747d8c;">No data found in database.</td></tr>';
+                    document.getElementById('avg-time').innerText = "0h 0m";
                 }
 
                 document.getElementById('total-users').innerText = totalCount;
@@ -160,12 +245,50 @@
             });
         }
 
+        // 📊 Chart.js Logic (Traffic Graph)
+        function updateChart(dataObj) {
+            const ctx = document.getElementById('trafficChart').getContext('2d');
+            
+            // Get last 7 days sorted
+            const labels = Object.keys(dataObj).sort().slice(-7);
+            const dataValues = labels.map(date => dataObj[date]);
+
+            if (trafficChartInstance) trafficChartInstance.destroy();
+
+            trafficChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cards Generated',
+                        data: dataValues,
+                        borderColor: '#ff4757',
+                        backgroundColor: 'rgba(255, 71, 87, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ff4757',
+                        pointRadius: 5,
+                        fill: true,
+                        tension: 0.4 // Smooth curves
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { precision: 0 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
         // 🗑️ Delete Function
         function deleteEntry(dateKey, userKey) {
-            if (confirm("Sach me delete karna hai? Ye wapas nahi aayega!")) {
+            if (confirm("Are you sure? This action cannot be undone!")) {
                 database.ref(`leaderboard/${dateKey}/${userKey}`).remove()
-                    .then(() => alert("Entry successfully deleted! 💥"))
-                    .catch((error) => alert("Error: " + error.message));
+                    .then(() => showToast("Entry deleted successfully! 🗑️"))
+                    .catch((error) => showToast("Error: " + error.message));
             }
         }
 
@@ -173,45 +296,29 @@
         function searchTable() {
             const input = document.getElementById("searchInput").value.toLowerCase();
             const rows = document.getElementsByClassName("user-row");
-            
             for (let i = 0; i < rows.length; i++) {
                 const nameCol = rows[i].getElementsByClassName("user-name")[0];
                 if (nameCol) {
-                    const nameValue = nameCol.textContent || nameCol.innerText;
-                    if (nameValue.toLowerCase().indexOf(input) > -1) {
-                        rows[i].style.display = "";
-                    } else {
-                        rows[i].style.display = "none";
-                    }
+                    rows[i].style.display = nameCol.textContent.toLowerCase().indexOf(input) > -1 ? "" : "none";
                 }
             }
         }
 
-        // 📥 Export to CSV Function
+        // 📥 Export CSV
         function exportToCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,Date,Name,Total Minutes,Formatted Time\n";
-            const rows = document.querySelectorAll("#adminTable tr.user-row");
-            
-            rows.forEach(row => {
+            let csvContent = "data:text/csv;charset=utf-8,Date,Nickname,Total Minutes,Formatted Time\n";
+            document.querySelectorAll("#adminTable tr.user-row").forEach(row => {
                 const cols = row.querySelectorAll("td");
-                const date = cols[0].innerText;
-                const name = cols[1].innerText;
-                const mins = cols[2].innerText;
-                const formatted = cols[3].innerText;
-                csvContent += `${date},${name},${mins},${formatted}\n`;
+                csvContent += `${cols[0].innerText},${cols[1].innerText},${cols[2].innerText},${cols[3].innerText}\n`;
             });
-
-            const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "UCforU_UserData.csv");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", "UCforU_Viral_Data.csv");
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            showToast("CSV Downloaded Successfully! 📥");
         }
-
-        // Script Load hote hi Data bula lo
-        loadAdminData();
     </script>
 </body>
 </html>
