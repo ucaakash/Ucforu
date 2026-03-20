@@ -26,7 +26,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
@@ -40,8 +39,8 @@
 </p>
 
 <div id="guideModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
-    <div class="glass-card" style="position: relative; max-width: 400px; width: 100%; margin: 0; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); backdrop-filter: blur(10px);">
-        <span id="closeGuide" style="position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #2d3436;">&times;</span>
+    <div class="glass-card" style="position: relative; max-width: 400px; width: 100%; margin: 0; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);">
+        <span id="closeGuide" style="position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: white;">&times;</span>
         
         <h2 style="text-align: center; margin-bottom: 20px;">How to Check ⏳</h2>
         
@@ -52,7 +51,7 @@
 
         <div id="contentAndroid" style="text-align: left; line-height: 1.6;">
             <ol style="padding-left: 20px;">
-                <li>Go to the phone's <b>Settings</b></li>
+                <li> Go to the phone's <b>Settings</b></li>
                 <li>Search <b>Digital Wellbeing & Screen Time.</b></li>
                 <li>Take <b>Screenshot</b> on Today Time.</li>
             </ol>
@@ -62,7 +61,7 @@
             <ol style="padding-left: 20px;">
                 <li>Go To iPhone <b>Settings</b>.</li>
                 <li>Search <b>Screen Time</b>.</li>
-                <li>Click On <b>See All Activity</b> And Take <b>Screenshot</b> .</li>
+                <li>Click On <b>See All Activity</b> And Take <b>Screenshot</b>.</li>
             </ol>
         </div>
         
@@ -74,7 +73,9 @@
     <h1>Ucforu</h1>
     <p>Create & Share Your Digital❤️ </p>
 </header>
+
 <div id="toast-container"></div>
+
 <main style="width: 100%; display: flex; flex-direction: column; align-items: center;">
     
     <div id="inputForm" class="glass-card">
@@ -90,20 +91,20 @@
         <button id="analyzeBtn" class="primary">Reveal My Digital Self</button>
     </div>
 
-    <div id="processing" class="glass-card" style="display: none;">
+    <div id="processing" class="glass-card">
         <div class="spinner"></div>
         <h2>Analyzing Image...❤️</h2>
         <p style="margin-top:10px; opacity:0.8;">Reading your digital self via AI...❤️</p>
     </div>
 
-    <div id="result" class="glass-card" style="display: none;">
+    <div id="result" class="glass-card">
         <h2>Your Card❤️</h2>
         <p style="margin-bottom: 20px; font-size: 0.9rem;">Long press image to save, or use button below.</p>
         
-        <img id="generated-image-preview" src="" alt="Your Screen Time Card" style="width: 100%; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <img id="generated-image-preview" src="" alt="Your Screen Time Card">
 
-        <button id="downloadBtn" class="primary" style="margin-bottom: 10px;">Download Card ⬇️</button>
-        <button id="shareBtn" class="primary" style="margin-bottom: 10px;">Share Link 🔗</button>
+        <button id="downloadBtn" class="primary">Download Card ⬇️</button>
+        <button id="shareBtn" class="primary">Share Link 🔗</button>
         <button id="challengeBtn" class="primary">Challenge Friends ⚔️</button>  
     </div>
 
@@ -131,7 +132,7 @@
     </div>
 </main>
 
-<div id="card-render-container" style="position: absolute; left: -9999px; top: -9999px;">
+<div id="card-render-container">
     <div id="instagram-card" class="instagram-card">
         <div class="floral-top">🌿</div>
         
@@ -148,7 +149,7 @@
         <div class="card-footer">ucforu.online<br>
         <span style="font-size: 50px; margin-top:50px; display:inline-block;">🌸</span></div>
         <br>
-        <div id="viral-card" style="display: flex; justify-content: center; margin-top: 10px;">
+        <div id="viral-card">
             <div id="qrcode-container"></div> 
         </div>
 
