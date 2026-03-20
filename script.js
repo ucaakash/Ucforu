@@ -21,8 +21,15 @@ if (!myDeviceId) {
     localStorage.setItem('ucforu_device_id', myDeviceId);
 }
 
-// Default settings (Admin sync hone se pehle)
-let liveSettings = { aiRoast: "poetic", cardTheme: "theme-floral", popupTitle: "How to Check ⏳" };
+// 🔥 FIX: Added missing settings for Admin controls
+let liveSettings = { 
+    aiRoast: "poetic", 
+    customPrompt: "",
+    cardTheme: "theme-floral", 
+    popupTitle: "How to Check ⏳",
+    isMaintenance: false,
+    announcementText: ""
+};
 
 try {
     firebase.initializeApp(firebaseConfig);
@@ -67,7 +74,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     const nickname = document.getElementById('nickname').value.trim();
     const file = document.getElementById('screenshot').files[0];
     
-    // 🔥 NAYA STRICT LOCK: 3 letters minimum chahiye!
+    // STRICT LOCK: 3 letters minimum chahiye!
     if (nickname.length < 3) {
         showToast("Naam kam se kam 3 letters ka hona chahiye! ❤️", "error");
         return;
@@ -89,7 +96,8 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 imageBase64: base64Image,
-                roastStyle: liveSettings.aiRoast 
+                roastStyle: liveSettings.aiRoast,
+                customPrompt: liveSettings.customPrompt // 🔥 FIX: Sending custom prompt
             })
         });
 
@@ -268,6 +276,32 @@ window.addEventListener("DOMContentLoaded", () => {
             if(snap.exists()) {
                 liveSettings = snap.val();
                 
+                // 🔥 FIX: Kill Switch (Maintenance) Logic Added
+                const inputForm = document.getElementById('inputForm');
+                const maintenanceMsg = document.getElementById('maintenance-msg');
+                const resultBlock = document.getElementById('result');
+
+                if (liveSettings.isMaintenance) {
+                    if (inputForm) inputForm.style.display = 'none';
+                    if (maintenanceMsg) maintenanceMsg.style.display = 'block';
+                } else {
+                    if (maintenanceMsg) maintenanceMsg.style.display = 'none';
+                    if (inputForm && (!resultBlock || resultBlock.style.display !== 'block')) {
+                        inputForm.style.display = 'block';
+                    }
+                }
+
+                // 🔥 FIX: Marquee (Announcement) Logic Added
+                const marqueeContainer = document.getElementById('live-marquee');
+                const marqueeText = document.getElementById('marquee-text');
+                
+                if(liveSettings.announcementText && liveSettings.announcementText.trim() !== "") {
+                    if(marqueeContainer) marqueeContainer.style.display = 'block';
+                    if(marqueeText) marqueeText.innerText = liveSettings.announcementText;
+                } else {
+                    if(marqueeContainer) marqueeContainer.style.display = 'none';
+                }
+
                 const guideHeader = document.querySelector("#guideModal h2");
                 if(guideHeader && !window.challengeID) { 
                     guideHeader.innerText = liveSettings.popupTitle || "How to Check ⏳"; 
