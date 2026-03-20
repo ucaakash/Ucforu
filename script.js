@@ -23,7 +23,13 @@ try {
     console.error("Firebase init error:", error); 
 }
 
-// --- IMAGE COMPRESSOR (Vercel limits bachane ke liye) ---
+// --- HELPER: Local Date for India Timezone (Leaderboard ke liye) ---
+function getLocalDailyKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+// --- IMAGE COMPRESSOR ---
 function compressImage(file) {
     return new Promise((resolve) => {
         const reader = new FileReader();
@@ -135,11 +141,10 @@ function handleBattleResult() {
     }
 }
 
-// 🔥 BUG FIX 1: Emojis/Hindi se crash nahi hoga
 function saveLeaderboardData(timeString) {
     if (database) {
-        const dailyKey = new Date().toISOString().split('T')[0];
-        const safeName = currentNickname.replace(/[^a-zA-Z0-9]/g, "User"); 
+        const dailyKey = getLocalDailyKey(); // FIX: Local Date
+        const safeName = currentNickname.replace(/[^a-zA-Z0-9]/g, "User"); // FIX: Emoji Crash
         const userKey = safeName + "_" + Date.now();
         
         database.ref(`leaderboard/${dailyKey}/${userKey}`).set({ 
@@ -151,10 +156,9 @@ function saveLeaderboardData(timeString) {
     }
 }
 
-// 🔥 BUG FIX 2: 1 user wala issue solved (Curly braces lagaye hain)
 function loadLeaderboard() {
     if (!database) return;
-    const dailyKey = new Date().toISOString().split('T')[0];
+    const dailyKey = getLocalDailyKey(); // FIX: Local Date
     const tbody = document.getElementById('leaderboardBody');
     
     database.ref('leaderboard/' + dailyKey).orderByChild('totalMinutes').limitToLast(10).on('value', (snap) => {
@@ -162,7 +166,7 @@ function loadLeaderboard() {
         if (snap.exists()) {
             let results = []; 
             
-            // Yahan brackets {} bohot zaroori the loop chalane ke liye
+            // FIX: Curly brackets to prevent loop break
             snap.forEach((child) => { 
                 results.push(child.val()); 
             });
@@ -211,12 +215,13 @@ function showToast(message, type = "info") {
     setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 400); }, 3000);
 }
 
-// --- PAGE LOAD & CHALLENGE BUTTON ---
+// --- PAGE LOAD & EVENT LISTENERS ---
 window.addEventListener("DOMContentLoaded", () => {
     const params = new URLSearchParams(window.location.search);
     window.challengeID = params.get("challenge");
     const guideModal = document.getElementById('guideModal');
 
+    // Challenge Banner
     if (window.challengeID && database) {
         const banner = document.createElement("div");
         banner.style.cssText = "background:rgba(0,0,0,0.3); padding:15px; border-radius:12px; margin-bottom:20px; text-align:center;";
@@ -234,6 +239,7 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Guide Modal Automatic & Close Logic
     if (guideModal) {
         if (window.challengeID || !localStorage.getItem('guideShown')) {
             setTimeout(() => { guideModal.style.display = 'flex'; }, 1000);
@@ -241,13 +247,14 @@ window.addEventListener("DOMContentLoaded", () => {
         document.getElementById('closeGuide').onclick = () => { guideModal.style.display = 'none'; localStorage.setItem('guideShown', 'true'); };
         window.onclick = (event) => { if (event.target == guideModal) { guideModal.style.display = "none"; localStorage.setItem('guideShown', 'true'); } };
     }
-    // -- MANUAL OPEN GUIDE BUTTON --
-    const openGuideBtn = document.getElementById('openGuideBtn');
-    if (openGuideBtn && guideModal) {
-        openGuideBtn.onclick = () => { guideModal.style.display = 'flex'; };
+
+    // FIX: Manual Guide Button Click Logic (Matched with HTML ID 'guideBtn')
+    const manualGuideBtn = document.getElementById('guideBtn');
+    if (manualGuideBtn && guideModal) {
+        manualGuideBtn.onclick = () => { guideModal.style.display = 'flex'; };
     }
 
-
+    // Tabs Logic
     const tabAndroid = document.getElementById('tabAndroid'), tabIphone = document.getElementById('tabIphone');
     const contentAndroid = document.getElementById('contentAndroid'), contentIphone = document.getElementById('contentIphone');
     if (tabAndroid && tabIphone) {
@@ -255,11 +262,11 @@ window.addEventListener("DOMContentLoaded", () => {
         tabIphone.onclick = () => { contentAndroid.style.display = 'none'; contentIphone.style.display = 'block'; tabAndroid.className = 'secondary'; tabIphone.className = 'primary'; };
     }
 
+    // Challenge Friend Button Logic
     const challengeBtn = document.getElementById("challengeBtn");
     if (challengeBtn) {
         challengeBtn.addEventListener("click", async () => {
             try {
-                // 🔥 BUG FIX 3: Challenge link mein bhi emoji crash fix
                 const safeName = currentNickname.replace(/[^a-zA-Z0-9]/g, "User");
                 const newChallengeID = safeName + "_" + Date.now();
                 
