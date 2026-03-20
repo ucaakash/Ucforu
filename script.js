@@ -14,6 +14,13 @@ let database = null;
 let currentUserTime = 0;
 let currentNickname = "";
 
+// 🔥 NAYA: Anti-Spam Device ID (Har phone ki apni pehchaan)
+let myDeviceId = localStorage.getItem('ucforu_device_id');
+if (!myDeviceId) {
+    myDeviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('ucforu_device_id', myDeviceId);
+}
+
 // 🔥 Default settings (Admin se connect hone tak ye rahenge)
 let liveSettings = { aiRoast: "poetic", cardTheme: "theme-floral", popupTitle: "How to Check ⏳" };
 
@@ -26,9 +33,11 @@ try {
     console.error("Firebase init error:", error); 
 }
 
-// --- HELPER: Local Date for India Timezone ---
+// 🔥 NAYA FIX: 12:00 AM Indian Standard Time (IST) Strict Lock
 function getLocalDailyKey() {
-    const d = new Date();
+    // Ye hamesha India ka time nikalega, chahe user ka phone kahin bhi ho
+    const dString = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+    const d = new Date(dString);
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
@@ -98,7 +107,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         document.getElementById('render-time').innerText = `${timeString} screen time`;
         document.getElementById('render-shayari').innerText = `"${aiData.shayari}"`;
 
-        // 🔥 FIX: QR Code pehle generate karo
+        // 🔥 FIX: QR Code pehle generate karo taaki photo me aa jaye
         generateMyQR();
 
         // ⏱️ FIX: 300 millisecond wait karo taaki QR code screen par theek se draw ho jaye
@@ -169,26 +178,46 @@ function saveLeaderboardData(timeString) {
             nickname: currentNickname, 
             totalMinutes: currentUserTime, 
             formattedTime: timeString,
+            deviceId: myDeviceId, // 🔥 NAYA: Anti-spam ke liye Device ID save kar rahe hain
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }).catch(err => console.error("Firebase Save Error:", err));
     }
 }
 
+// 🔥 NAYA FIX: Smart Leaderboard (Ek phone se ek hi entry dikhegi best wali)
 function loadLeaderboard() {
     if (!database) return;
     const dailyKey = getLocalDailyKey(); 
     const tbody = document.getElementById('leaderboardBody');
     
-    database.ref('leaderboard/' + dailyKey).orderByChild('totalMinutes').limitToLast(10).on('value', (snap) => {
+    database.ref('leaderboard/' + dailyKey).on('value', (snap) => {
         tbody.innerHTML = "";
         if (snap.exists()) {
-            let results = []; 
-            snap.forEach((child) => { results.push(child.val()); });
+            let uniqueDevices = {}; 
             
-            results.reverse().forEach((data, index) => {
-                const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
-                tbody.innerHTML += `<tr><td>${medal}</td><td>${data.nickname}</td><td style="text-align: right;">${data.formattedTime}</td></tr>`;
+            snap.forEach((child) => { 
+                let data = child.val(); 
+                // Phone (Device ID) se duplicate pakdenge
+                let groupingKey = data.deviceId || data.nickname.toLowerCase().trim();
+
+                // Agar phone naya hai YA score purane wale se zyada hai, tabhi save karo
+                if (!uniqueDevices[groupingKey] || uniqueDevices[groupingKey].totalMinutes < data.totalMinutes) {
+                    uniqueDevices[groupingKey] = data;
+                }
             });
+            
+            let results = Object.values(uniqueDevices);
+            results.sort((a, b) => b.totalMinutes - a.totalMinutes);
+            let top10 = results.slice(0, 10);
+
+            if (top10.length > 0) {
+                top10.forEach((data, index) => {
+                    const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
+                    tbody.innerHTML += `<tr><td>${medal}</td><td>${data.nickname}</td><td style="text-align: right;">${data.formattedTime}</td></tr>`;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No data yet</td></tr>';
+            }
         } else {
             tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No data yet</td></tr>';
         }
@@ -244,7 +273,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     guideHeader.innerText = liveSettings.popupTitle || "How to Check ⏳"; 
                 }
 
-                // 🔥 2. NAYA: Android & iPhone Popup Steps Update
+                // 2. Android & iPhone Popup Steps Update
                 const androidContent = document.getElementById("contentAndroid");
                 const iphoneContent = document.getElementById("contentIphone");
                 
