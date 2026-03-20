@@ -13,9 +13,9 @@ const firebaseConfig = {
 let database = null;
 let currentUserTime = 0;
 let currentNickname = "";
-// NAYI LINES YAHAN DAALO:
-let liveSettings = { aiRoast: "poetic", cardTheme: "theme-floral", popupTitle: "How to Check ⏳" };
 
+// 🔥 NAYA: Default settings (Jab tak admin kuch change na kare)
+let liveSettings = { aiRoast: "poetic", cardTheme: "theme-floral", popupTitle: "How to Check ⏳" };
 
 try {
     firebase.initializeApp(firebaseConfig);
@@ -26,7 +26,6 @@ try {
     console.error("Firebase init error:", error); 
 }
 
-// --- HELPER: Local Date for India Timezone (Leaderboard ke liye) ---
 function getLocalDailyKey() {
     const d = new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -70,15 +69,15 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     try {
         const base64Image = await compressImage(file);
 
-                const response = await fetch('/api/analyze', {
+        // 🔥 YAHAN CHANGE HAI: Admin ka Roast Style API ko bheja ja raha hai
+        const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 imageBase64: base64Image,
-                roastStyle: liveSettings.aiRoast // Ye Admin panel se aayega
+                roastStyle: liveSettings.aiRoast // Admin ka mood AI ko bhej diya
             })
         });
-
 
         if (!response.ok) throw new Error("API_ERROR");
         
@@ -100,7 +99,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 
         await document.fonts.ready;
         const renderCard = document.getElementById('instagram-card');
-        const canvas = await html2canvas(renderCard, { scale: 1.5, useCORS: true, backgroundColor: "#fdfaf6" });
+        const canvas = await html2canvas(renderCard, { scale: 1.5, useCORS: true, backgroundColor: liveSettings.cardTheme === "theme-dark" ? "#1e1e1e" : "#fdfaf6" });
         const imageDataUrl = canvas.toDataURL("image/png");
 
         document.getElementById('generated-image-preview').src = imageDataUrl;
@@ -150,8 +149,8 @@ function handleBattleResult() {
 
 function saveLeaderboardData(timeString) {
     if (database) {
-        const dailyKey = getLocalDailyKey(); // FIX: Local Date
-        const safeName = currentNickname.replace(/[^a-zA-Z0-9]/g, "User"); // FIX: Emoji Crash
+        const dailyKey = getLocalDailyKey(); 
+        const safeName = currentNickname.replace(/[^a-zA-Z0-9]/g, "User"); 
         const userKey = safeName + "_" + Date.now();
         
         database.ref(`leaderboard/${dailyKey}/${userKey}`).set({ 
@@ -165,18 +164,14 @@ function saveLeaderboardData(timeString) {
 
 function loadLeaderboard() {
     if (!database) return;
-    const dailyKey = getLocalDailyKey(); // FIX: Local Date
+    const dailyKey = getLocalDailyKey(); 
     const tbody = document.getElementById('leaderboardBody');
     
     database.ref('leaderboard/' + dailyKey).orderByChild('totalMinutes').limitToLast(10).on('value', (snap) => {
         tbody.innerHTML = "";
         if (snap.exists()) {
             let results = []; 
-            
-            // FIX: Curly brackets to prevent loop break
-            snap.forEach((child) => { 
-                results.push(child.val()); 
-            });
+            snap.forEach((child) => { results.push(child.val()); });
             
             results.reverse().forEach((data, index) => {
                 const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1);
@@ -188,7 +183,6 @@ function loadLeaderboard() {
     });
 }
 
-// --- UI ACTIONS (Download, Share, QR, Modals) ---
 function setupDownloadAndShare(imgUrl) {
     document.getElementById('downloadBtn').onclick = () => {
         const link = document.createElement('a'); link.download = `UCforU_${currentNickname}.png`; link.href = imgUrl; link.click();
@@ -222,13 +216,44 @@ function showToast(message, type = "info") {
     setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 400); }, 3000);
 }
 
-// --- PAGE LOAD & EVENT LISTENERS ---
+// --- PAGE LOAD, EVENT LISTENERS & LIVE ADMIN CONTROLS ---
 window.addEventListener("DOMContentLoaded", () => {
+    
+    // 🔥 NAYA: Firebase se Admin Settings Live Read Karna
+    if(database) {
+        database.ref('app_settings').on('value', (snap) => {
+            if(snap.exists()) {
+                liveSettings = snap.val();
+                
+                // 1. Popup Title Update
+                const guideHeader = document.querySelector("#guideModal h2");
+                if(guideHeader && !window.challengeID) { 
+                    guideHeader.innerText = liveSettings.popupTitle || "How to Check ⏳"; 
+                }
+
+                // 2. Card Theme Update (Live Color Change)
+                const instaCard = document.getElementById("instagram-card");
+                const cardTitle = document.querySelector(".card-title");
+                
+                if(instaCard) {
+                    if(liveSettings.cardTheme === "theme-dark") {
+                        instaCard.style.backgroundColor = "#1e1e1e";
+                        instaCard.style.color = "#ffffff";
+                        if(cardTitle) cardTitle.style.color = "#ff4757";
+                    } else {
+                        instaCard.style.backgroundColor = "#fdfaf6";
+                        instaCard.style.color = "#2d3436";
+                        if(cardTitle) cardTitle.style.color = "#203a70";
+                    }
+                }
+            }
+        });
+    }
+
     const params = new URLSearchParams(window.location.search);
     window.challengeID = params.get("challenge");
     const guideModal = document.getElementById('guideModal');
 
-    // Challenge Banner
     if (window.challengeID && database) {
         const banner = document.createElement("div");
         banner.style.cssText = "background:rgba(0,0,0,0.3); padding:15px; border-radius:12px; margin-bottom:20px; text-align:center;";
@@ -246,7 +271,6 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Guide Modal Automatic & Close Logic
     if (guideModal) {
         if (window.challengeID || !localStorage.getItem('guideShown')) {
             setTimeout(() => { guideModal.style.display = 'flex'; }, 1000);
@@ -255,13 +279,11 @@ window.addEventListener("DOMContentLoaded", () => {
         window.onclick = (event) => { if (event.target == guideModal) { guideModal.style.display = "none"; localStorage.setItem('guideShown', 'true'); } };
     }
 
-    // FIX: Manual Guide Button Click Logic (Matched with HTML ID 'guideBtn')
     const manualGuideBtn = document.getElementById('guideBtn');
     if (manualGuideBtn && guideModal) {
         manualGuideBtn.onclick = () => { guideModal.style.display = 'flex'; };
     }
 
-    // Tabs Logic
     const tabAndroid = document.getElementById('tabAndroid'), tabIphone = document.getElementById('tabIphone');
     const contentAndroid = document.getElementById('contentAndroid'), contentIphone = document.getElementById('contentIphone');
     if (tabAndroid && tabIphone) {
@@ -269,7 +291,6 @@ window.addEventListener("DOMContentLoaded", () => {
         tabIphone.onclick = () => { contentAndroid.style.display = 'none'; contentIphone.style.display = 'block'; tabAndroid.className = 'secondary'; tabIphone.className = 'primary'; };
     }
 
-    // Challenge Friend Button Logic
     const challengeBtn = document.getElementById("challengeBtn");
     if (challengeBtn) {
         challengeBtn.addEventListener("click", async () => {
@@ -297,38 +318,6 @@ window.addEventListener("DOMContentLoaded", () => {
                     showToast("Challenge link copied 🔥", "success");
                 }
             } catch (err) { console.error("Challenge failed", err); }
-        });
-    }
-});
-
-// --- LIVE APP CONTROLS (Connected to Admin) ---
-window.addEventListener("DOMContentLoaded", () => {
-    if(database) {
-        database.ref('app_settings').on('value', (snap) => {
-            if(snap.exists()) {
-                liveSettings = snap.val();
-                
-                // 1. Update Popup Title Live
-                const guideHeader = document.querySelector("#guideModal h2");
-                if(guideHeader && !window.challengeID) { 
-                    guideHeader.innerText = liveSettings.popupTitle; 
-                }
-
-                // 2. Update Card Theme Live
-                const instaCard = document.getElementById("instagram-card");
-                if(instaCard) {
-                    // Agar dark mode choose kiya hai, toh card black ho jayega
-                    if(liveSettings.cardTheme === "theme-dark") {
-                        instaCard.style.backgroundColor = "#1e1e1e";
-                        instaCard.style.color = "#ffffff";
-                        document.querySelector(".card-title").style.color = "#ff4757";
-                    } else {
-                        instaCard.style.backgroundColor = "#fdfaf6";
-                        instaCard.style.color = "#2d3436";
-                        document.querySelector(".card-title").style.color = "#203a70";
-                    }
-                }
-            }
         });
     }
 });
