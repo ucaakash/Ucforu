@@ -13,6 +13,9 @@ const firebaseConfig = {
 let database = null;
 let currentUserTime = 0;
 let currentNickname = "";
+// NAYI LINES YAHAN DAALO:
+let liveSettings = { aiRoast: "poetic", cardTheme: "theme-floral", popupTitle: "How to Check ⏳" };
+
 
 try {
     firebase.initializeApp(firebaseConfig);
@@ -67,11 +70,15 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     try {
         const base64Image = await compressImage(file);
 
-        const response = await fetch('/api/analyze', {
+                const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ imageBase64: base64Image })
+            body: JSON.stringify({ 
+                imageBase64: base64Image,
+                roastStyle: liveSettings.aiRoast // Ye Admin panel se aayega
+            })
         });
+
 
         if (!response.ok) throw new Error("API_ERROR");
         
@@ -290,6 +297,38 @@ window.addEventListener("DOMContentLoaded", () => {
                     showToast("Challenge link copied 🔥", "success");
                 }
             } catch (err) { console.error("Challenge failed", err); }
+        });
+    }
+});
+
+// --- LIVE APP CONTROLS (Connected to Admin) ---
+window.addEventListener("DOMContentLoaded", () => {
+    if(database) {
+        database.ref('app_settings').on('value', (snap) => {
+            if(snap.exists()) {
+                liveSettings = snap.val();
+                
+                // 1. Update Popup Title Live
+                const guideHeader = document.querySelector("#guideModal h2");
+                if(guideHeader && !window.challengeID) { 
+                    guideHeader.innerText = liveSettings.popupTitle; 
+                }
+
+                // 2. Update Card Theme Live
+                const instaCard = document.getElementById("instagram-card");
+                if(instaCard) {
+                    // Agar dark mode choose kiya hai, toh card black ho jayega
+                    if(liveSettings.cardTheme === "theme-dark") {
+                        instaCard.style.backgroundColor = "#1e1e1e";
+                        instaCard.style.color = "#ffffff";
+                        document.querySelector(".card-title").style.color = "#ff4757";
+                    } else {
+                        instaCard.style.backgroundColor = "#fdfaf6";
+                        instaCard.style.color = "#2d3436";
+                        document.querySelector(".card-title").style.color = "#203a70";
+                    }
+                }
+            }
         });
     }
 });
