@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>UCforU - Ultimate Master Admin 👑</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,15 +28,15 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
         /* Login Screen */
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-box { background: var(--surface); padding: 40px; border-radius: 16px; text-align: center; width: 90%; max-width: 400px; box-shadow: 0 10px 30px var(--shadow); border: 1px solid var(--border); }
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
+        .login-box { background: var(--surface); padding: 40px; border-radius: 16px; text-align: center; width: 100%; max-width: 400px; box-shadow: 0 10px 30px var(--shadow); border: 1px solid var(--border); }
         .login-box h2 { color: var(--primary); margin-top: 0; font-size: 28px; }
-        .login-box input { width: 100%; padding: 14px; margin: 20px 0; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px; font-size: 16px; outline: none; }
-        .login-box button { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), #ff6b81); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .login-box input { width: 100%; padding: 14px; margin: 10px 0; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px; font-size: 16px; outline: none; }
+        .login-box button { width: 100%; padding: 14px; margin-top: 15px; background: linear-gradient(135deg, var(--primary), #ff6b81); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         
         /* Dashboard Layout */
-        #dashboard { display: none; width: 100%; height: 100%; }
-        .sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 0; display: flex; flex-direction: column; }
+        #dashboard { display: none; width: 100%; height: 100%; flex-direction: row; }
+        .sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 0; display: flex; flex-direction: column; overflow-y: auto; }
         .logo { text-align: center; font-size: 26px; font-weight: 800; color: var(--primary); margin-bottom: 30px; letter-spacing: 1px; }
         .nav-btn { padding: 16px 25px; border: none; background: none; width: 100%; text-align: left; font-size: 16px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-left: 4px solid transparent; }
         .nav-btn:hover { background: var(--bg); color: var(--text); }
@@ -50,7 +50,7 @@
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
         .header h1 { margin: 0; font-size: 28px; font-weight: 700; }
         .live-badge { background: rgba(46, 213, 115, 0.1); color: var(--success); padding: 8px 15px; border-radius: 20px; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 8px; }
         .pulse { width: 10px; height: 10px; background: var(--success); border-radius: 50%; animation: blink 1.5s infinite; }
@@ -67,34 +67,30 @@
         .stat-card p { margin: 5px 0 0; color: var(--text-muted); font-size: 13px; font-weight: 600; text-transform: uppercase; }
 
         /* Hall of Shame */
-        .top-addicts { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap;}
+        .top-addicts { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
         .addict-card { flex: 1; min-width: 150px; background: linear-gradient(135deg, var(--surface), var(--bg)); border: 1px solid var(--warning); padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px var(--shadow); }
         .addict-card i { color: var(--warning); font-size: 24px; margin-bottom: 10px; }
         .addict-card h4 { margin: 0; font-size: 16px; color: var(--text); }
         .addict-card p { margin: 5px 0 0; font-weight: bold; color: var(--primary); font-size: 14px;}
 
         /* Charts & Tables */
-        .chart-container { background: var(--surface); padding: 20px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 30px; height: 300px; }
-        .controls { display: flex; justify-content: space-between; gap: 15px; margin-bottom: 15px; }
+        .chart-container { background: var(--surface); padding: 20px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 30px; height: 300px; width: 100%; }
+        .controls { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
         .search-box { padding: 12px 20px; width: 100%; max-width: 300px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 10px; outline: none; }
-        .btn-action { background: var(--secondary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .btn-action:hover { opacity: 0.9; }
-
-        .table-container { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 4px 15px var(--shadow); }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); }
+        
+        .table-container { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow-x: auto; box-shadow: 0 4px 15px var(--shadow); width: 100%; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
         th { background-color: var(--bg); font-weight: 600; text-transform: uppercase; font-size: 13px; color: var(--text-muted); }
         tr:hover { background-color: var(--bg); }
         .delete-btn { background: rgba(255, 71, 87, 0.1); color: var(--primary); border: 1px solid var(--primary); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .delete-btn:hover { background: var(--primary); color: white; }
 
         /* LIVE CONTROLS (CMS) STYLING */
-        .cms-panel { background: var(--surface); padding: 30px; border-radius: 16px; border: 1px solid var(--border); max-width: 600px; box-shadow: 0 4px 15px var(--shadow); }
+        .cms-panel { background: var(--surface); padding: 30px; border-radius: 16px; border: 1px solid var(--border); max-width: 600px; box-shadow: 0 4px 15px var(--shadow); width: 100%; }
         .form-group { margin-bottom: 25px; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text); font-size: 15px; }
         .form-group select, .form-group input { width: 100%; padding: 14px; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px; font-size: 15px; outline: none; }
         .save-cms-btn { width: 100%; background: linear-gradient(135deg, var(--success), #26ae60); color: white; padding: 15px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(46, 213, 115, 0.3); transition: 0.3s; }
-        .save-cms-btn:hover { transform: translateY(-2px); }
 
         /* Live Toast Notification */
         #live-toast { visibility: hidden; min-width: 280px; background: linear-gradient(135deg, #1e293b, #0f172a); color: #fff; border-left: 5px solid var(--success); border-radius: 8px; padding: 15px 20px; position: fixed; z-index: 1000; right: 30px; top: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transform: translateX(120%); transition: transform 0.4s, visibility 0.4s; }
@@ -102,32 +98,60 @@
         .toast-title { font-size: 12px; color: var(--success); text-transform: uppercase; font-weight: bold; letter-spacing: 1px; margin-bottom: 5px; }
 
         /* Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        /* 📱 MOBILE RESPONSIVE CSS (Naya jadoo yahan hai) */
+        @media (max-width: 768px) {
+            body { height: auto; overflow-y: auto; }
+            #dashboard { flex-direction: column; }
+            
+            /* Sidebar becomes top nav on mobile */
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding: 10px; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; }
+            .logo { width: 100%; margin-bottom: 10px; font-size: 22px; text-align: left; padding-left: 10px; }
+            
+            /* Hide lines and adjust buttons for mobile */
+            hr { display: none; }
+            .nav-btn { width: auto; padding: 10px 12px; font-size: 14px; text-align: center; border-left: none; border-bottom: 3px solid transparent; flex: 1; min-width: 30%; }
+            .nav-btn.active { border-left: none; border-bottom-color: var(--primary); background: transparent; }
+            .nav-btn i { display: block; margin: 0 auto 5px auto; font-size: 18px; }
+            
+            .main-content { padding: 15px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .header h1 { font-size: 24px; }
+            .cms-panel { padding: 20px; }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .nav-btn { font-size: 12px; }
+        }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="login-box">
-            <h2><i class="fa-solid fa-bolt"></i> Master Admin</h2>
+            <h2><i class="fa-solid fa-bolt"></i> Secure Access</h2>
             <p style="color: var(--text-muted); font-size: 14px;">Enter credentials to unlock</p>
-            <input type="password" id="adminPass" placeholder="Master Password" onkeypress="if(event.key === 'Enter') checkLogin()">
+            <input type="text" id="adminUser" placeholder="Username" onkeypress="if(event.key === 'Enter') checkLogin()">
+            <input type="password" id="adminPass" placeholder="Password " onkeypress="if(event.key === 'Enter') checkLogin()">
+            
             <button onclick="checkLogin()">Authorize Access</button>
-            <p id="login-error" style="color: var(--primary); display: none; margin-top: 15px; font-size: 14px; font-weight:bold;">❌ Access Denied!</p>
+            <p id="login-error" style="color: var(--primary); display: none; margin-top: 15px; font-size: 14px; font-weight:bold;">❌ Invalid Username or Password!</p>
         </div>
     </div>
 
     <div id="dashboard">
         <div class="sidebar">
             <div class="logo">UCforU 👑</div>
-            <button class="nav-btn active" onclick="switchTab('analytics', this)"><i class="fa-solid fa-chart-line"></i> Analytics</button>
-            <button class="nav-btn" onclick="switchTab('cms', this)"><i class="fa-solid fa-sliders"></i> App Controls</button>
-            <hr style="border:0; border-top:1px solid var(--border); margin: 20px 0;">
-            <button class="nav-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i> <span id="theme-text">Dark Mode</span></button>
-            <button class="nav-btn" onclick="exportToCSV()"><i class="fa-solid fa-file-excel"></i> Export CSV</button>
-            <button class="nav-btn" onclick="location.reload()" style="margin-top: auto; color: var(--primary);"><i class="fa-solid fa-power-off"></i> Logout</button>
+            <button class="nav-btn active" onclick="switchTab('analytics', this)"><i class="fa-solid fa-chart-line"></i> <br>Analytics</button>
+            <button class="nav-btn" onclick="switchTab('cms', this)"><i class="fa-solid fa-sliders"></i> <br>Controls</button>
+            <hr style="border:0; border-top:1px solid var(--border); margin: 20px 0; width: 100%;">
+            <button class="nav-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon" id="theme-icon"></i> <br><span id="theme-text">Dark</span></button>
+            <button class="nav-btn" onclick="exportToCSV()"><i class="fa-solid fa-file-excel"></i> <br>Export</button>
+            <button class="nav-btn" onclick="logoutAdmin()" style="color: var(--primary);"><i class="fa-solid fa-power-off"></i> <br>Logout</button>
         </div>
 
         <div class="main-content">
@@ -203,17 +227,40 @@
     </div>
 
     <script>
-        // --- 1. UI & TABS LOGIC ---
+        // --- 1. PERSISTENT LOGIN LOGIC (No Logout on Refresh) ---
+        window.onload = () => {
+            // Check if user is already logged in
+            if (localStorage.getItem('isRashiLoggedIn') === 'true') {
+                showDashboard();
+            }
+        };
+
         function checkLogin() {
-            if (document.getElementById('adminPass').value === "Akash@2026") {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('dashboard').style.display = 'flex';
-                initFirebase();
+            const user = document.getElementById('adminUser').value;
+            const pass = document.getElementById('adminPass').value;
+            
+            // 🔥 Naya ID aur Password
+            if (user === "Rashi" && pass === "Rashi9012") {
+                localStorage.setItem('isRashiLoggedIn', 'true'); // Save session
+                showDashboard();
             } else {
                 document.getElementById('login-error').style.display = 'block';
             }
         }
 
+        function showDashboard() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+            initFirebase();
+        }
+
+        // 🔥 Naya Logout Function
+        function logoutAdmin() {
+            localStorage.removeItem('isRashiLoggedIn'); // Clear session
+            location.reload(); // Refresh to show login screen
+        }
+
+        // --- 2. TABS & UI LOGIC ---
         function switchTab(tabId, btnElement) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -225,7 +272,7 @@
         function toggleTheme() {
             isDark = !isDark;
             document.body.classList.toggle('dark-mode', isDark);
-            document.getElementById('theme-text').innerText = isDark ? "Light Mode" : "Dark Mode";
+            document.getElementById('theme-text').innerText = isDark ? "Light" : "Dark";
             document.getElementById('theme-icon').className = isDark ? "fa-solid fa-sun" : "fa-solid fa-moon";
             if(trafficChartInstance) updateChart(lastChartData);
         }
@@ -248,7 +295,7 @@
             }, 30);
         }
 
-        // --- 2. FIREBASE LOGIC ---
+        // --- 3. FIREBASE LOGIC ---
         let database, trafficChartInstance = null, lastChartData = {};
         let initialLoad = false, prevTotal = 0;
 
@@ -282,7 +329,10 @@
                 let totalCount = 0, todayCount = 0, totalMins = 0;
                 let flatUsers = [];
                 const datesCount = {};
-                const today = new Date().toISOString().split('T')[0];
+                
+                // Fix Date Timezone
+                const d = new Date();
+                const today = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 
                 if (snap.exists()) {
                     const data = snap.val();
@@ -297,7 +347,7 @@
                             tbody.innerHTML += `<tr class="user-row">
                                 <td>${date}</td><td class="user-name"><strong>${u.nickname}</strong></td>
                                 <td>${u.totalMinutes}</td><td><span style="background:var(--bg); padding:4px 8px; border-radius:4px;">${u.formattedTime}</span></td>
-                                <td><button class="delete-btn" onclick="deleteUser('${date}','${user}')">Delete</button></td>
+                                <td><button class="delete-btn" onclick="deleteUser('${date}','${user}')"><i class="fa-solid fa-trash"></i></button></td>
                             </tr>`;
                         });
                     });
@@ -327,7 +377,7 @@
             });
         }
 
-        // --- 3. CHART & CONTROLS ---
+        // --- 4. CHART & EXPORT CONTROLS ---
         function updateChart(dataObj) {
             const ctx = document.getElementById('trafficChart').getContext('2d');
             const labels = Object.keys(dataObj).sort().slice(-7);
@@ -343,7 +393,7 @@
         }
 
         function deleteUser(d, u) {
-            if(confirm("Delete this user?")) database.ref(`leaderboard/${d}/${u}`).remove();
+            if(confirm("Delete this user permanently?")) database.ref(`leaderboard/${d}/${u}`).remove();
         }
 
         function searchTable() {
@@ -357,50 +407,51 @@
         function exportToCSV() {
             let csv = "Date,Nickname,Total Minutes,Formatted Time\n";
             document.querySelectorAll(".user-row").forEach(row => {
-                const cols = row.querySelectorAll("td");
-                csv += `${cols[0].innerText},${cols[1].innerText},${cols[2].innerText},${cols[3].innerText}\n`;
+                if(row.style.display !== 'none') {
+                    const cols = row.querySelectorAll("td");
+                    csv += `${cols[0].innerText},${cols[1].innerText},${cols[2].innerText},${cols[3].innerText}\n`;
+                }
             });
             const link = document.createElement("a"); link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
             link.download = "UCforU_Data.csv"; link.click();
         }
-        // --- NAYA CMS SAVE LOGIC (With Feedback) ---
+
+        // --- 5. CMS LOGIC (APP SETTINGS) ---
+        function loadCMS() {
+            database.ref('app_settings').on('value', snap => {
+                if(snap.exists()) {
+                    const s = snap.val();
+                    document.getElementById('cms-roast').value = s.aiRoast || 'poetic';
+                    document.getElementById('cms-theme').value = s.cardTheme || 'theme-floral';
+                    document.getElementById('cms-popup').value = s.popupTitle || 'How to Check ⏳';
+                }
+            });
+        }
+
         function saveCMS() {
-            // Button ko pakdo aur text change karo
             const btn = document.querySelector('.save-cms-btn');
             const originalText = btn.innerHTML;
             btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Updating Live...";
 
-            // Naya Data
             const data = {
                 aiRoast: document.getElementById('cms-roast').value,
                 cardTheme: document.getElementById('cms-theme').value,
                 popupTitle: document.getElementById('cms-popup').value
             };
-
-            // Firebase me save karo
+            
             database.ref('app_settings').set(data).then(() => {
-                // Save hone par button green kardo
                 btn.innerHTML = "<i class='fa-solid fa-check'></i> Successfully Saved!";
                 btn.style.background = "#2ed573";
-                
-                // Mobile ke liye mast alert!
                 alert("✅ Settings Live on Website!\n\nAb website par jake refresh karo, naye changes dikhenge.");
-
-                // 3 second baad button wapas normal kardo
                 setTimeout(() => {
                     btn.innerHTML = originalText;
                     btn.style.background = "linear-gradient(135deg, var(--success), #26ae60)";
                 }, 3000);
-                
-                showLiveToast("✅ CMS Updated", "Website settings updated LIVE globally!");
-            }).catch((error) => {
-                alert("❌ Error: " + error.message);
+            }).catch((err) => {
+                alert("❌ Permission Denied Error: " + err.message);
                 btn.innerHTML = "Error! Try Again";
             });
         }
-
-       
-        
     </script>
 </body>
 </html>
