@@ -21,7 +21,7 @@ if (!myDeviceId) {
     localStorage.setItem('ucforu_device_id', myDeviceId);
 }
 
-// Default settings
+// Default settings (Admin sync hone se pehle)
 let liveSettings = { aiRoast: "poetic", cardTheme: "theme-floral", popupTitle: "How to Check ⏳" };
 
 try {
@@ -67,8 +67,13 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     const nickname = document.getElementById('nickname').value.trim();
     const file = document.getElementById('screenshot').files[0];
     
-    if (!nickname || !file) {
-        showToast(nickname ? "Please upload screenshot!" : "Enter your name first!", "error");
+    // 🔥 NAYA STRICT LOCK: 3 letters minimum chahiye!
+    if (nickname.length < 3) {
+        showToast("Naam kam se kam 3 letters ka hona chahiye! ❤️", "error");
+        return;
+    }
+    if (!file) {
+        showToast("Please upload screenshot! ❤️", "error");
         return;
     }
     
@@ -78,6 +83,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     try {
         const base64Image = await compressImage(file);
 
+        // API Call
         const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -105,8 +111,10 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         document.getElementById('render-time').innerText = `${timeString} screen time`;
         document.getElementById('render-shayari').innerText = `"${aiData.shayari}"`;
 
+        // QR Code generate 
         generateMyQR();
 
+        // 300ms wait taaki QR aur Fonts load ho jayein
         await new Promise(resolve => setTimeout(resolve, 300));
         await document.fonts.ready;
 
@@ -138,6 +146,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     }
 });
 
+// --- BATTLE & LEADERBOARD LOGIC ---
 function handleBattleResult() {
     let creatorTime = window.challengeData.creatorTime;
     let winner = currentUserTime > creatorTime ? currentNickname : window.challengeData.creator;
@@ -178,7 +187,7 @@ function saveLeaderboardData(timeString) {
     }
 }
 
-// 🔥 BUG FIX: Smart Leaderboard Grouping
+// Smart Leaderboard (Anti-Spam)
 function loadLeaderboard() {
     if (!database) return;
     const dailyKey = getLocalDailyKey(); 
@@ -191,8 +200,6 @@ function loadLeaderboard() {
             
             snap.forEach((child) => { 
                 let data = child.val(); 
-                
-                // 🔥 FIX: Ab Device ID aur Naam DONO milakar check karega
                 let groupingKey = (data.deviceId || "nodevice") + "_" + data.nickname.toLowerCase().trim();
 
                 if (!uniqueEntries[groupingKey] || uniqueEntries[groupingKey].totalMinutes < data.totalMinutes) {
@@ -255,6 +262,7 @@ function showToast(message, type = "info") {
 // --- PAGE LOAD & EVENTS ---
 window.addEventListener("DOMContentLoaded", () => {
     
+    // Live Admin Settings Sync
     if(database) {
         database.ref('app_settings').on('value', (snap) => {
             if(snap.exists()) {
@@ -297,6 +305,7 @@ window.addEventListener("DOMContentLoaded", () => {
     window.challengeID = params.get("challenge");
     const guideModal = document.getElementById('guideModal');
 
+    // Challenge Mode UI
     if (window.challengeID && database) {
         const banner = document.createElement("div");
         banner.style.cssText = "background:rgba(0,0,0,0.3); padding:15px; border-radius:12px; margin-bottom:20px; text-align:center;";
@@ -314,6 +323,7 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Modal Events
     if (guideModal) {
         if (window.challengeID || !localStorage.getItem('guideShown')) {
             setTimeout(() => { guideModal.style.display = 'flex'; }, 1000);
@@ -327,6 +337,7 @@ window.addEventListener("DOMContentLoaded", () => {
         manualGuideBtn.onclick = () => { guideModal.style.display = 'flex'; };
     }
 
+    // Tab Logic
     const tabAndroid = document.getElementById('tabAndroid'), tabIphone = document.getElementById('tabIphone');
     const contentAndroid = document.getElementById('contentAndroid'), contentIphone = document.getElementById('contentIphone');
     if (tabAndroid && tabIphone) {
@@ -334,6 +345,7 @@ window.addEventListener("DOMContentLoaded", () => {
         tabIphone.onclick = () => { contentAndroid.style.display = 'none'; contentIphone.style.display = 'block'; tabAndroid.className = 'secondary'; tabIphone.className = 'primary'; };
     }
 
+    // Challenge Friend Button
     const challengeBtn = document.getElementById("challengeBtn");
     if (challengeBtn) {
         challengeBtn.addEventListener("click", async () => {
