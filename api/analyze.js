@@ -2,13 +2,24 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    const { imageBase64 } = req.body;
+    // 🔥 1. YAHAN CHANGE KIYA: req.body se image ke saath roastStyle bhi nikala
+    const { imageBase64, roastStyle } = req.body;
     const apiKey = process.env.GEMINI_API_KEY ? process.env.GEMINI_API_KEY.trim() : null;
 
     if (!apiKey) return res.status(500).json({ error: 'API Key Missing in Vercel!' });
 
-    // MODEL NAME UPDATED TO: gemini-2.5-flash
-    // Endpoint: v1beta (Naye models ke liye yahi best hai)
+    // 🔥 2. AI KA MOOD DECIDE KIYA (Admin Panel ke hisaab se)
+    let personality = "Write a soft, poetic 2-line Hindi Shayari about screen time.";
+    if (roastStyle === "meme") {
+        personality = "Write a highly sarcastic, GenZ meme-style funny roast in Hindi/Hinglish about their screen addiction.";
+    } else if (roastStyle === "brutal") {
+        personality = "Write a brutal, insulting, and savage roast in Hindi about wasting life on the phone.";
+    }
+
+    // 🔥 3. DYNAMIC PROMPT (Tumhara purana prompt + Naya personality mix)
+    const promptText = `Analyze this mobile screen time image. Return ONLY a valid JSON object: {"isRealScreenshot": true, "isOwnCard": false, "hours": 5, "minutes": 30, "shayari": "Your custom shayari here"}. ${personality} No extra text or markdown code blocks.`;
+
+    // Endpoint: v1beta (gemini-2.5-flash)
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(apiUrl, {
@@ -17,7 +28,7 @@ module.exports = async (req, res) => {
       body: JSON.stringify({
         contents: [{
           parts: [
-            { text: "Analyze this mobile screen time image. Return ONLY a valid JSON object: {\"isRealScreenshot\": true, \"isOwnCard\": false, \"hours\": 5, \"minutes\": 30, \"shayari\": \"Your funny Hindi roast shayari here\"}. No extra text or markdown code blocks." },
+            { text: promptText }, // Yahan naya dynamic prompt pass kiya
             { inline_data: { mime_type: "image/jpeg", data: imageBase64.split(',')[1] } }
           ]
         }]
