@@ -51,7 +51,6 @@
 
         .chart-container { background: var(--surface); padding: 20px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 30px; height: 300px; width: 100%; }
         
-        /* 🔥 Added Search Box Style */
         .controls { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
         .search-box { padding: 12px 20px; width: 100%; max-width: 300px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 10px; outline: none; }
 
@@ -65,7 +64,6 @@
         .nuke-btn { background: #e74c3c; color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); animation: pulseRed 2s infinite; }
         @keyframes pulseRed { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* CMS STYLING */
         .cms-panel { background: var(--surface); padding: 30px; border-radius: 16px; border: 1px solid var(--border); max-width: 800px; box-shadow: 0 4px 15px var(--shadow); width: 100%; }
         .form-group { margin-bottom: 25px; padding: 15px; border-radius: 10px; background: rgba(0,0,0,0.02); border: 1px dashed var(--border); }
         .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text); font-size: 15px; }
@@ -141,7 +139,6 @@
                 <div class="header"><h1>🎛️ God Controls</h1></div>
 
                 <div class="cms-panel">
-                    
                     <div class="form-group" style="border-color: var(--primary); background: rgba(255, 71, 87, 0.05);">
                         <label><i class="fa-solid fa-power-off"></i> 1. Server Kill Switch (Maintenance Mode)</label>
                         <select id="cms-kill" style="font-weight: bold;">
@@ -149,12 +146,10 @@
                             <option value="true">🔴 OFFLINE (Maintenance Mode)</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label><i class="fa-solid fa-bullhorn"></i> 2. Live Breaking News (Red Ticker)</label>
                         <input type="text" id="cms-marquee" placeholder="E.g., 🔥 Akash just broke the record with 15 hours! (Leave blank to hide)">
                     </div>
-
                     <div class="form-group">
                         <label><i class="fa-solid fa-robot"></i> 3. AI Personality (Roast Level)</label>
                         <select id="cms-roast" onchange="toggleCustomPrompt()">
@@ -163,9 +158,8 @@
                             <option value="brutal">Brutal Savage (Heavy Roast)</option>
                             <option value="custom">🔥 CUSTOM (God Mode Prompt)</option>
                         </select>
-                        <textarea id="cms-custom-prompt" rows="3" style="display:none; margin-top: 10px; border-color: var(--secondary);" placeholder="Type exactly how AI should act... E.g., 'Write a 1-line sarcastic comment like a strict Indian father.'"></textarea>
+                        <textarea id="cms-custom-prompt" rows="3" style="display:none; margin-top: 10px; border-color: var(--secondary);" placeholder="Type exactly how AI should act..."></textarea>
                     </div>
-
                     <div class="form-group">
                         <label><i class="fa-solid fa-palette"></i> 4. Instagram Card Theme</label>
                         <select id="cms-theme">
@@ -173,10 +167,19 @@
                             <option value="theme-dark">Dark Mode (Black/Neon Red)</option>
                         </select>
                     </div>
-
                     <div class="form-group">
                         <label><i class="fa-solid fa-heading"></i> 5. Guide Popup Title</label>
-                        <input type="text" id="cms-popup" placeholder="E.g., How to Check ⏳ Dear">
+                        <input type="text" id="cms-popup" placeholder="E.g., How to Check ⏳">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fa-brands fa-android" style="color:#a4c639;"></i> 6. Full Android Guide Steps (HTML)</label>
+                        <textarea id="cms-android-guide" rows="4"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fa-brands fa-apple"></i> 7. Full iPhone Guide Steps (HTML)</label>
+                        <textarea id="cms-iphone-guide" rows="4"></textarea>
                     </div>
 
                     <button class="save-cms-btn" onclick="saveCMS()"><i class="fa-solid fa-bolt"></i> EXECUTE GOD COMMANDS</button>
@@ -187,11 +190,7 @@
 
     <script>
         window.onload = () => { if (localStorage.getItem('isRashiLoggedIn') === 'true') showDashboard(); };
-        function checkLogin() {
-            if (document.getElementById('adminUser').value === "Rashi" && document.getElementById('adminPass').value === "Rashi9012") {
-                localStorage.setItem('isRashiLoggedIn', 'true'); showDashboard();
-            } else { document.getElementById('login-error').style.display = 'block'; }
-        }
+        function checkLogin() { if (document.getElementById('adminUser').value === "Rashi" && document.getElementById('adminPass').value === "Rashi9012") { localStorage.setItem('isRashiLoggedIn', 'true'); showDashboard(); } else { document.getElementById('login-error').style.display = 'block'; } }
         function showDashboard() { document.getElementById('login-screen').style.display = 'none'; document.getElementById('dashboard').style.display = 'flex'; initFirebase(); }
         function logoutAdmin() { localStorage.removeItem('isRashiLoggedIn'); location.reload(); }
 
@@ -247,7 +246,6 @@
             });
         }
 
-        // 🔥 FIX: Search Table Logic
         function searchTable() {
             const input = document.getElementById("searchInput").value.toLowerCase();
             document.querySelectorAll(".user-row").forEach(row => {
@@ -263,19 +261,23 @@
         }
         function deleteUser(d, u) { if(confirm("Delete this user?")) database.ref(`leaderboard/${d}/${u}`).remove(); }
         
-        // 4. THE NUKE BUTTON
         function nukeDatabase() {
             if(confirm("🚨 WARNING! You are about to DELETE ALL Leaderboard Data! Proceed?")) {
                 if(confirm("💣 100% SURE? This CANNOT BE UNDONE!")) {
+                    const btn = document.querySelector('.nuke-btn'); const originalText = btn.innerHTML;
+                    btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> NUKING...";
                     database.ref('leaderboard').remove().then(() => {
-                        alert("💥 NUKE SUCCESSFUL! Database is clean.");
-                        location.reload();
+                        alert("💥 NUKE SUCCESSFUL! Database is clean."); location.reload();
+                    }).catch((error) => {
+                        console.error("Nuke Failed:", error);
+                        alert("❌ NUKE FAILED! Firebase Permission Error: " + error.message + "\n\n(Bhai, Firebase Rules me .write: true check karo)");
+                        btn.innerHTML = originalText;
                     });
                 }
             }
         }
 
-        // --- CMS SYSTEM ---
+        // 🔥 FIX: Load Full Guides into Textareas
         function loadCMS() {
             database.ref('app_settings').on('value', snap => {
                 if(snap.exists()) {
@@ -286,36 +288,34 @@
                     document.getElementById('cms-custom-prompt').value = s.customPrompt || "";
                     document.getElementById('cms-theme').value = s.cardTheme || 'theme-floral';
                     document.getElementById('cms-popup').value = s.popupTitle || 'How to Check ⏳';
+                    
+                    // Default HTML text if nothing is saved yet
+                    document.getElementById('cms-android-guide').value = s.androidGuide || '<ol style="padding-left: 20px;"><li> Go to the phone\'s <b>Settings</b></li><li>Search <b>Digital Wellbeing & Screen Time.</b></li><li>Take <b>Screenshot</b> on Today Time.</li></ol>';
+                    document.getElementById('cms-iphone-guide').value = s.iphoneGuide || '<ol style="padding-left: 20px;"><li>Go To iPhone <b>Settings</b>.</li><li>Search <b>Screen Time</b>.</li><li>Click On <b>See All Activity</b> And Take <b>Screenshot</b>.</li></ol>';
+                    
                     toggleCustomPrompt();
                 }
             });
         }
 
+        // 🔥 FIX: Save Full Guides from Textareas
         function saveCMS() {
-            const btn = document.querySelector('.save-cms-btn');
-            const originalText = btn.innerHTML;
+            const btn = document.querySelector('.save-cms-btn'); const originalText = btn.innerHTML;
             btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> EXECUTING...";
-
+            
             const data = {
                 isMaintenance: document.getElementById('cms-kill').value === "true",
                 announcementText: document.getElementById('cms-marquee').value,
                 aiRoast: document.getElementById('cms-roast').value,
                 customPrompt: document.getElementById('cms-custom-prompt').value,
                 cardTheme: document.getElementById('cms-theme').value,
-                popupTitle: document.getElementById('cms-popup').value
+                popupTitle: document.getElementById('cms-popup').value,
+                androidGuide: document.getElementById('cms-android-guide').value, // Saved directly
+                iphoneGuide: document.getElementById('cms-iphone-guide').value    // Saved directly
             };
             
-            // Note: Preserving Android/iPhone guides if they exist
-            database.ref('app_settings').once('value').then(snap => {
-                if(snap.exists()) {
-                    const old = snap.val();
-                    if(old.androidGuide) data.androidGuide = old.androidGuide;
-                    if(old.iphoneGuide) data.iphoneGuide = old.iphoneGuide;
-                }
-                return database.ref('app_settings').set(data);
-            }).then(() => {
-                btn.innerHTML = "<i class='fa-solid fa-check'></i> GOD COMMANDS SAVED!";
-                btn.style.background = "#2ed573";
+            database.ref('app_settings').set(data).then(() => {
+                btn.innerHTML = "<i class='fa-solid fa-check'></i> GOD COMMANDS SAVED!"; btn.style.background = "#2ed573";
                 alert("✅ Global Settings Updated Instantly!");
                 setTimeout(() => { btn.innerHTML = originalText; btn.style.background = "linear-gradient(135deg, var(--success), #26ae60)"; }, 3000);
             }).catch((err) => { alert("❌ Error: " + err.message); btn.innerHTML = "Error! Try Again"; });
