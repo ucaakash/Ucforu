@@ -13,10 +13,6 @@
     <meta property="og:description" content="My AI just roasted my screen time! Click here to accept the challenge.">
     <meta property="og:image" content="https://ucforu.online/preview.jpg">
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://ucforu.online/">
-    <meta property="twitter:title" content="Dare to beat my Screen Time? ⏳🔥">
-    <meta property="twitter:description" content="My AI just roasted my screen time! Click here to accept the challenge.">
-    <meta property="twitter:image" content="https://ucforu.online/preview.jpg">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,6 +20,7 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
@@ -84,7 +81,7 @@
     <div id="processing" class="glass-card">
         <div class="spinner"></div>
         <h2>Analyzing Image...❤️</h2>
-        <p style="margin-top:10px; opacity:0.8;">Reading your digital self via AI...❤️</p>
+        <p id="loading-text" style="margin-top:10px; opacity:0.8; font-weight: 600;">Scanning your digital footprint... 📱</p>
     </div>
 
     <div id="result" class="glass-card">
