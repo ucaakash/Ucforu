@@ -3,7 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UCforU - Viral Screen Time Card</title>
+    
+    <title>UCforU - AI Screen Time Roast & Challenge ⏳🔥</title>
+    <meta name="title" content="UCforU - AI Screen Time Roast & Challenge ⏳🔥">
+    <meta name="description" content="Find out your screen time addiction! Upload your screenshot, get roasted by our AI, and challenge your friends to beat your score.">
+    <meta name="keywords" content="screen time checker, AI roast, screen time challenge, instagram screen time, digital wellbeing, UCforU">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ucforu.online/">
+    <meta property="og:title" content="Dare to beat my Screen Time? ⏳🔥">
+    <meta property="og:description" content="My AI just roasted my screen time! Click here to upload your screenshot and accept the challenge.">
+    <meta property="og:image" content="https://ucforu.online/preview.jpg">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://ucforu.online/">
+    <meta property="twitter:title" content="Dare to beat my Screen Time? ⏳🔥">
+    <meta property="twitter:description" content="My AI just roasted my screen time! Click here to accept the challenge.">
+    <meta property="twitter:image" content="https://ucforu.online/preview.jpg">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,14 +33,15 @@
 
     <link rel="stylesheet" href="style.css">
 </head>
-<p id="guideBtn" style="color: #2d3436;
-font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.9rem; text-align: center;">
+<body>
+
+<p id="guideBtn" style="color: #2d3436; font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.9rem; text-align: center;">
     [How to take a screenshot?(Guide)❤️]
 </p>
 
 <div id="guideModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
-    <div class="glass-card" style="position: relative; max-width: 400px; width: 100%; margin: 0; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);">
-        <span id="closeGuide" style="position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: white;">&times;</span>
+    <div class="glass-card" style="position: relative; max-width: 400px; width: 100%; margin: 0; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); backdrop-filter: blur(10px);">
+        <span id="closeGuide" style="position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #2d3436;">&times;</span>
         
         <h2 style="text-align: center; margin-bottom: 20px;">How to Check ⏳</h2>
         
@@ -35,7 +52,7 @@ font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.9rem; text-ali
 
         <div id="contentAndroid" style="text-align: left; line-height: 1.6;">
             <ol style="padding-left: 20px;">
-                <li> Go to the phone's <b>Settings</b></li>
+                <li>Go to the phone's <b>Settings</b></li>
                 <li>Search <b>Digital Wellbeing & Screen Time.</b></li>
                 <li>Take <b>Screenshot</b> on Today Time.</li>
             </ol>
@@ -53,8 +70,6 @@ font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.9rem; text-ali
     </div>
 </div>
 
-<body>
-
 <header>
     <h1>Ucforu</h1>
     <p>Create & Share Your Digital❤️ </p>
@@ -65,7 +80,8 @@ font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.9rem; text-ali
     <div id="inputForm" class="glass-card">
         <div class="input-group">
             <label for="nickname">Your Name❤️</label>
-            <input type="text" id="nickname" placeholder="Enter Nickname">
+            <input type="text" id="nickname" placeholder="Enter Name (3-10 Letters)" minlength="3" maxlength="10" 
+                   oninput="this.value = this.value.replace(/[^a-zA-Z\u0900-\u097F\s]/g, ''); if(this.value.length > 10) this.value = this.value.slice(0, 10);">
         </div>
         <div class="input-group">
             <label for="screenshot">Upload Screen Time ❤️</label>
@@ -74,21 +90,21 @@ font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.9rem; text-ali
         <button id="analyzeBtn" class="primary">Reveal My Digital Self</button>
     </div>
 
-    <div id="processing" class="glass-card">
+    <div id="processing" class="glass-card" style="display: none;">
         <div class="spinner"></div>
         <h2>Analyzing Image...❤️</h2>
         <p style="margin-top:10px; opacity:0.8;">Reading your digital self via AI...❤️</p>
     </div>
 
-    <div id="result" class="glass-card">
+    <div id="result" class="glass-card" style="display: none;">
         <h2>Your Card❤️</h2>
         <p style="margin-bottom: 20px; font-size: 0.9rem;">Long press image to save, or use button below.</p>
         
-        <img id="generated-image-preview" src="" alt="Your Screen Time Card">
+        <img id="generated-image-preview" src="" alt="Your Screen Time Card" style="width: 100%; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
 
-        <button id="downloadBtn" class="primary">Download Card ⬇️</button>
-       <button id="shareBtn" class="primary">Share Link 🔗</button>
-      <button id="challengeBtn" class="primary">Challenge Friends ⚔️</button>  
+        <button id="downloadBtn" class="primary" style="margin-bottom: 10px;">Download Card ⬇️</button>
+        <button id="shareBtn" class="primary" style="margin-bottom: 10px;">Share Link 🔗</button>
+        <button id="challengeBtn" class="primary">Challenge Friends ⚔️</button>  
     </div>
 
     <div id="leaderboard" class="glass-card">
@@ -106,15 +122,16 @@ font-weight: 600; cursor: pointer; margin-top: 10px; font-size: 0.9rem; text-ali
             </tbody>
         </table>
     </div>
-<div class="credit">
-Design by ❤️ 
-<a href="https://www.instagram.com/uc.akash?igsh=MXRqc2NpaDJ4dHY4dA==" target="_blank">
-Ucforu
-</a> ❤️
-</div>
+    
+    <div class="credit">
+        Design by ❤️ 
+        <a href="https://www.instagram.com/uc.akash?igsh=MXRqc2NpaDJ4dHY4dA==" target="_blank">
+            Ucforu
+        </a> ❤️
+    </div>
 </main>
 
-<div id="card-render-container">
+<div id="card-render-container" style="position: absolute; left: -9999px; top: -9999px;">
     <div id="instagram-card" class="instagram-card">
         <div class="floral-top">🌿</div>
         
@@ -130,9 +147,10 @@ Ucforu
         <div class="card-divider">❤️─────💐─────❤️</div>
         <div class="card-footer">ucforu.online<br>
         <span style="font-size: 50px; margin-top:50px; display:inline-block;">🌸</span></div>
-         <br>=	 <div id="viral-card">
-    <div id="qrcode-container"></div> 
-</div>
+        <br>
+        <div id="viral-card" style="display: flex; justify-content: center; margin-top: 10px;">
+            <div id="qrcode-container"></div> 
+        </div>
 
         <div class="floral-bottom">🌿</div>
     </div>
