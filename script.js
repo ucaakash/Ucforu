@@ -244,7 +244,18 @@ window.addEventListener("DOMContentLoaded", () => {
                     guideHeader.innerText = liveSettings.popupTitle || "How to Check ⏳"; 
                 }
 
-                // 2. Card Theme Update (Live Color Change)
+                // 🔥 2. NAYA: Android & iPhone Popup Steps Update
+                const androidContent = document.getElementById("contentAndroid");
+                const iphoneContent = document.getElementById("contentIphone");
+                
+                if(androidContent && liveSettings.androidGuide) {
+                    androidContent.innerHTML = liveSettings.androidGuide;
+                }
+                if(iphoneContent && liveSettings.iphoneGuide) {
+                    iphoneContent.innerHTML = liveSettings.iphoneGuide;
+                }
+
+                // 3. Card Theme Update (Live Color Change)
                 const instaCard = document.getElementById("instagram-card");
                 const cardTitle = document.querySelector(".card-title");
                 
