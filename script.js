@@ -14,7 +14,7 @@ let database = null;
 let currentUserTime = 0;
 let currentNickname = "";
 
-// 🔥 NAYA: Default settings (Jab tak admin kuch change na kare)
+// 🔥 Default settings (Admin se connect hone tak ye rahenge)
 let liveSettings = { aiRoast: "poetic", cardTheme: "theme-floral", popupTitle: "How to Check ⏳" };
 
 try {
@@ -26,6 +26,7 @@ try {
     console.error("Firebase init error:", error); 
 }
 
+// --- HELPER: Local Date for India Timezone ---
 function getLocalDailyKey() {
     const d = new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -69,13 +70,13 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     try {
         const base64Image = await compressImage(file);
 
-        // 🔥 YAHAN CHANGE HAI: Admin ka Roast Style API ko bheja ja raha hai
+        // Fetch API call with Admin's Roast Style
         const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 imageBase64: base64Image,
-                roastStyle: liveSettings.aiRoast // Admin ka mood AI ko bhej diya
+                roastStyle: liveSettings.aiRoast 
             })
         });
 
@@ -97,9 +98,21 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         document.getElementById('render-time').innerText = `${timeString} screen time`;
         document.getElementById('render-shayari').innerText = `"${aiData.shayari}"`;
 
+        // 🔥 FIX: QR Code pehle generate karo
+        generateMyQR();
+
+        // ⏱️ FIX: 300 millisecond wait karo taaki QR code screen par theek se draw ho jaye
+        await new Promise(resolve => setTimeout(resolve, 300));
         await document.fonts.ready;
+
+        // Ab screenshot lo (Canvas)
         const renderCard = document.getElementById('instagram-card');
-        const canvas = await html2canvas(renderCard, { scale: 1.5, useCORS: true, backgroundColor: liveSettings.cardTheme === "theme-dark" ? "#1e1e1e" : "#fdfaf6" });
+        const canvas = await html2canvas(renderCard, { 
+            scale: 1.5, 
+            useCORS: true, 
+            backgroundColor: liveSettings.cardTheme === "theme-dark" ? "#1e1e1e" : "#fdfaf6" 
+        });
+        
         const imageDataUrl = canvas.toDataURL("image/png");
 
         document.getElementById('generated-image-preview').src = imageDataUrl;
@@ -109,7 +122,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         saveLeaderboardData(timeString);
         setupDownloadAndShare(imageDataUrl);
         if (window.challengeData) handleBattleResult();
-        generateMyQR();
 
     } catch (error) {
         console.error(error);
@@ -183,6 +195,7 @@ function loadLeaderboard() {
     });
 }
 
+// --- UI ACTIONS (Download, Share, QR, Modals) ---
 function setupDownloadAndShare(imgUrl) {
     document.getElementById('downloadBtn').onclick = () => {
         const link = document.createElement('a'); link.download = `UCforU_${currentNickname}.png`; link.href = imgUrl; link.click();
@@ -219,7 +232,7 @@ function showToast(message, type = "info") {
 // --- PAGE LOAD, EVENT LISTENERS & LIVE ADMIN CONTROLS ---
 window.addEventListener("DOMContentLoaded", () => {
     
-    // 🔥 NAYA: Firebase se Admin Settings Live Read Karna
+    // 🔥 LIVE ADMIN SYNC (Firebase Listener)
     if(database) {
         database.ref('app_settings').on('value', (snap) => {
             if(snap.exists()) {
@@ -250,10 +263,12 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // URL Parameters for Challenge Logic
     const params = new URLSearchParams(window.location.search);
     window.challengeID = params.get("challenge");
     const guideModal = document.getElementById('guideModal');
 
+    // Challenge Banner Display
     if (window.challengeID && database) {
         const banner = document.createElement("div");
         banner.style.cssText = "background:rgba(0,0,0,0.3); padding:15px; border-radius:12px; margin-bottom:20px; text-align:center;";
@@ -271,6 +286,7 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Guide Modal Logic
     if (guideModal) {
         if (window.challengeID || !localStorage.getItem('guideShown')) {
             setTimeout(() => { guideModal.style.display = 'flex'; }, 1000);
@@ -279,11 +295,13 @@ window.addEventListener("DOMContentLoaded", () => {
         window.onclick = (event) => { if (event.target == guideModal) { guideModal.style.display = "none"; localStorage.setItem('guideShown', 'true'); } };
     }
 
+    // Manual Guide Button
     const manualGuideBtn = document.getElementById('guideBtn');
     if (manualGuideBtn && guideModal) {
         manualGuideBtn.onclick = () => { guideModal.style.display = 'flex'; };
     }
 
+    // OS Tabs Logic (Android/iPhone)
     const tabAndroid = document.getElementById('tabAndroid'), tabIphone = document.getElementById('tabIphone');
     const contentAndroid = document.getElementById('contentAndroid'), contentIphone = document.getElementById('contentIphone');
     if (tabAndroid && tabIphone) {
@@ -291,6 +309,7 @@ window.addEventListener("DOMContentLoaded", () => {
         tabIphone.onclick = () => { contentAndroid.style.display = 'none'; contentIphone.style.display = 'block'; tabAndroid.className = 'secondary'; tabIphone.className = 'primary'; };
     }
 
+    // Challenge Friend Button Logic
     const challengeBtn = document.getElementById("challengeBtn");
     if (challengeBtn) {
         challengeBtn.addEventListener("click", async () => {
