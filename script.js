@@ -14,14 +14,14 @@ let database = null;
 let currentUserTime = 0;
 let currentNickname = "";
 
-// 🔥 NAYA: Anti-Spam Device ID (Har phone ki apni pehchaan)
+// Anti-Spam Device ID
 let myDeviceId = localStorage.getItem('ucforu_device_id');
 if (!myDeviceId) {
     myDeviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     localStorage.setItem('ucforu_device_id', myDeviceId);
 }
 
-// 🔥 Default settings (Admin se connect hone tak ye rahenge)
+// Default settings
 let liveSettings = { aiRoast: "poetic", cardTheme: "theme-floral", popupTitle: "How to Check ⏳" };
 
 try {
@@ -33,9 +33,8 @@ try {
     console.error("Firebase init error:", error); 
 }
 
-// 🔥 NAYA FIX: 12:00 AM Indian Standard Time (IST) Strict Lock
+// 12:00 AM IST Strict Lock
 function getLocalDailyKey() {
-    // Ye hamesha India ka time nikalega, chahe user ka phone kahin bhi ho
     const dString = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
     const d = new Date(dString);
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -79,7 +78,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     try {
         const base64Image = await compressImage(file);
 
-        // Fetch API call with Admin's Roast Style
         const response = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -107,14 +105,11 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         document.getElementById('render-time').innerText = `${timeString} screen time`;
         document.getElementById('render-shayari').innerText = `"${aiData.shayari}"`;
 
-        // 🔥 FIX: QR Code pehle generate karo taaki photo me aa jaye
         generateMyQR();
 
-        // ⏱️ FIX: 300 millisecond wait karo taaki QR code screen par theek se draw ho jaye
         await new Promise(resolve => setTimeout(resolve, 300));
         await document.fonts.ready;
 
-        // Ab screenshot lo (Canvas)
         const renderCard = document.getElementById('instagram-card');
         const canvas = await html2canvas(renderCard, { 
             scale: 1.5, 
@@ -143,7 +138,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     }
 });
 
-// --- BATTLE & LEADERBOARD LOGIC ---
 function handleBattleResult() {
     let creatorTime = window.challengeData.creatorTime;
     let winner = currentUserTime > creatorTime ? currentNickname : window.challengeData.creator;
@@ -178,13 +172,13 @@ function saveLeaderboardData(timeString) {
             nickname: currentNickname, 
             totalMinutes: currentUserTime, 
             formattedTime: timeString,
-            deviceId: myDeviceId, // 🔥 NAYA: Anti-spam ke liye Device ID save kar rahe hain
+            deviceId: myDeviceId, 
             timestamp: firebase.database.ServerValue.TIMESTAMP
         }).catch(err => console.error("Firebase Save Error:", err));
     }
 }
 
-// 🔥 NAYA FIX: Smart Leaderboard (Ek phone se ek hi entry dikhegi best wali)
+// 🔥 BUG FIX: Smart Leaderboard Grouping
 function loadLeaderboard() {
     if (!database) return;
     const dailyKey = getLocalDailyKey(); 
@@ -193,20 +187,20 @@ function loadLeaderboard() {
     database.ref('leaderboard/' + dailyKey).on('value', (snap) => {
         tbody.innerHTML = "";
         if (snap.exists()) {
-            let uniqueDevices = {}; 
+            let uniqueEntries = {}; 
             
             snap.forEach((child) => { 
                 let data = child.val(); 
-                // Phone (Device ID) se duplicate pakdenge
-                let groupingKey = data.deviceId || data.nickname.toLowerCase().trim();
+                
+                // 🔥 FIX: Ab Device ID aur Naam DONO milakar check karega
+                let groupingKey = (data.deviceId || "nodevice") + "_" + data.nickname.toLowerCase().trim();
 
-                // Agar phone naya hai YA score purane wale se zyada hai, tabhi save karo
-                if (!uniqueDevices[groupingKey] || uniqueDevices[groupingKey].totalMinutes < data.totalMinutes) {
-                    uniqueDevices[groupingKey] = data;
+                if (!uniqueEntries[groupingKey] || uniqueEntries[groupingKey].totalMinutes < data.totalMinutes) {
+                    uniqueEntries[groupingKey] = data;
                 }
             });
             
-            let results = Object.values(uniqueDevices);
+            let results = Object.values(uniqueEntries);
             results.sort((a, b) => b.totalMinutes - a.totalMinutes);
             let top10 = results.slice(0, 10);
 
@@ -224,7 +218,7 @@ function loadLeaderboard() {
     });
 }
 
-// --- UI ACTIONS (Download, Share, QR, Modals) ---
+// --- UI ACTIONS ---
 function setupDownloadAndShare(imgUrl) {
     document.getElementById('downloadBtn').onclick = () => {
         const link = document.createElement('a'); link.download = `UCforU_${currentNickname}.png`; link.href = imgUrl; link.click();
@@ -258,22 +252,19 @@ function showToast(message, type = "info") {
     setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 400); }, 3000);
 }
 
-// --- PAGE LOAD, EVENT LISTENERS & LIVE ADMIN CONTROLS ---
+// --- PAGE LOAD & EVENTS ---
 window.addEventListener("DOMContentLoaded", () => {
     
-    // 🔥 LIVE ADMIN SYNC (Firebase Listener)
     if(database) {
         database.ref('app_settings').on('value', (snap) => {
             if(snap.exists()) {
                 liveSettings = snap.val();
                 
-                // 1. Popup Title Update
                 const guideHeader = document.querySelector("#guideModal h2");
                 if(guideHeader && !window.challengeID) { 
                     guideHeader.innerText = liveSettings.popupTitle || "How to Check ⏳"; 
                 }
 
-                // 2. Android & iPhone Popup Steps Update
                 const androidContent = document.getElementById("contentAndroid");
                 const iphoneContent = document.getElementById("contentIphone");
                 
@@ -284,7 +275,6 @@ window.addEventListener("DOMContentLoaded", () => {
                     iphoneContent.innerHTML = liveSettings.iphoneGuide;
                 }
 
-                // 3. Card Theme Update (Live Color Change)
                 const instaCard = document.getElementById("instagram-card");
                 const cardTitle = document.querySelector(".card-title");
                 
@@ -303,12 +293,10 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // URL Parameters for Challenge Logic
     const params = new URLSearchParams(window.location.search);
     window.challengeID = params.get("challenge");
     const guideModal = document.getElementById('guideModal');
 
-    // Challenge Banner Display
     if (window.challengeID && database) {
         const banner = document.createElement("div");
         banner.style.cssText = "background:rgba(0,0,0,0.3); padding:15px; border-radius:12px; margin-bottom:20px; text-align:center;";
@@ -326,7 +314,6 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Guide Modal Logic
     if (guideModal) {
         if (window.challengeID || !localStorage.getItem('guideShown')) {
             setTimeout(() => { guideModal.style.display = 'flex'; }, 1000);
@@ -335,13 +322,11 @@ window.addEventListener("DOMContentLoaded", () => {
         window.onclick = (event) => { if (event.target == guideModal) { guideModal.style.display = "none"; localStorage.setItem('guideShown', 'true'); } };
     }
 
-    // Manual Guide Button
     const manualGuideBtn = document.getElementById('guideBtn');
     if (manualGuideBtn && guideModal) {
         manualGuideBtn.onclick = () => { guideModal.style.display = 'flex'; };
     }
 
-    // OS Tabs Logic (Android/iPhone)
     const tabAndroid = document.getElementById('tabAndroid'), tabIphone = document.getElementById('tabIphone');
     const contentAndroid = document.getElementById('contentAndroid'), contentIphone = document.getElementById('contentIphone');
     if (tabAndroid && tabIphone) {
@@ -349,7 +334,6 @@ window.addEventListener("DOMContentLoaded", () => {
         tabIphone.onclick = () => { contentAndroid.style.display = 'none'; contentIphone.style.display = 'block'; tabAndroid.className = 'secondary'; tabIphone.className = 'primary'; };
     }
 
-    // Challenge Friend Button Logic
     const challengeBtn = document.getElementById("challengeBtn");
     if (challengeBtn) {
         challengeBtn.addEventListener("click", async () => {
