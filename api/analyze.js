@@ -1,4 +1,4 @@
-module.exports = async (req, res) => { // 🔥 FIX 1: Chhota 'm' kar diya
+module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
@@ -36,21 +36,16 @@ module.exports = async (req, res) => { // 🔥 FIX 1: Chhota 'm' kar diya
 
     const data = await response.json();
     
-    // 🔥 FIX 2: Agar Google API fail ho jaye
     if (data.error) {
         console.error("Google API Error:", data.error.message);
         return res.status(response.status).json({ error: data.error.message });
     }
 
-    // 🔥 FIX 3: Agar AI answer dena bhool jaye (Crash protection)
     if (!data.candidates || data.candidates.length === 0) {
-        console.error("Gemini Empty Response:", data);
         throw new Error("AI failed to read image.");
     }
 
     let aiText = data.candidates[0].content.parts[0].text;
-    
-    // Clean and Parse JSON safely
     aiText = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsedData = JSON.parse(aiText);
     
