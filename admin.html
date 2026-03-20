@@ -363,29 +363,44 @@
             const link = document.createElement("a"); link.href = encodeURI("data:text/csv;charset=utf-8," + csv);
             link.download = "UCforU_Data.csv"; link.click();
         }
-
-        // --- 4. CMS LOGIC (APP SETTINGS) ---
-        function loadCMS() {
-            database.ref('app_settings').on('value', snap => {
-                if(snap.exists()) {
-                    const s = snap.val();
-                    document.getElementById('cms-roast').value = s.aiRoast || 'poetic';
-                    document.getElementById('cms-theme').value = s.cardTheme || 'theme-floral';
-                    document.getElementById('cms-popup').value = s.popupTitle || 'How to Check ⏳';
-                }
-            });
-        }
-
+        // --- NAYA CMS SAVE LOGIC (With Feedback) ---
         function saveCMS() {
+            // Button ko pakdo aur text change karo
+            const btn = document.querySelector('.save-cms-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> Updating Live...";
+
+            // Naya Data
             const data = {
                 aiRoast: document.getElementById('cms-roast').value,
                 cardTheme: document.getElementById('cms-theme').value,
                 popupTitle: document.getElementById('cms-popup').value
             };
+
+            // Firebase me save karo
             database.ref('app_settings').set(data).then(() => {
+                // Save hone par button green kardo
+                btn.innerHTML = "<i class='fa-solid fa-check'></i> Successfully Saved!";
+                btn.style.background = "#2ed573";
+                
+                // Mobile ke liye mast alert!
+                alert("✅ Settings Live on Website!\n\nAb website par jake refresh karo, naye changes dikhenge.");
+
+                // 3 second baad button wapas normal kardo
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = "linear-gradient(135deg, var(--success), #26ae60)";
+                }, 3000);
+                
                 showLiveToast("✅ CMS Updated", "Website settings updated LIVE globally!");
+            }).catch((error) => {
+                alert("❌ Error: " + error.message);
+                btn.innerHTML = "Error! Try Again";
             });
         }
+
+       
+        
     </script>
 </body>
 </html>
