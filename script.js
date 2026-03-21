@@ -97,12 +97,38 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         document.getElementById('render-time').innerText = `${timeString} screen time`;
         document.getElementById('render-shayari').innerText = `"${aiData.shayari}"`;
 
+        // 🔥 DYNAMIC COLOR LOGIC (0-4 White, 4-10 Pink, 10-24 Black)
+        const instaCard = document.getElementById('instagram-card');
+        const cardTitle = document.querySelector(".card-title");
+        let dynamicBgColor = "#ffffff"; 
+
+        if (aiData.hours < 4) {
+            // Safe Zone (White)
+            dynamicBgColor = "#ffffff";
+            instaCard.style.backgroundColor = dynamicBgColor;
+            instaCard.style.color = "#2d3436";
+            if (cardTitle) cardTitle.style.color = "#2ed573"; // Green Title
+        } else if (aiData.hours >= 4 && aiData.hours < 10) {
+            // Warning Zone (Pink)
+            dynamicBgColor = "#ffe4e1"; // Light Pink
+            instaCard.style.backgroundColor = dynamicBgColor;
+            instaCard.style.color = "#2d3436";
+            if (cardTitle) cardTitle.style.color = "#e84393"; // Dark Pink Title
+        } else {
+            // Danger Zone (Black)
+            dynamicBgColor = "#1e1e1e"; // Black
+            instaCard.style.backgroundColor = dynamicBgColor;
+            instaCard.style.color = "#ffffff";
+            if (cardTitle) cardTitle.style.color = "#ff4757"; // Red Title
+        }
+
         generateMyQR();
         await new Promise(resolve => setTimeout(resolve, 300));
         await document.fonts.ready;
 
         const renderCard = document.getElementById('instagram-card');
-        const canvas = await html2canvas(renderCard, { scale: 1.5, useCORS: true, backgroundColor: liveSettings.cardTheme === "theme-dark" ? "#1e1e1e" : "#fdfaf6" });
+        // Use Dynamic Color for Canvas
+        const canvas = await html2canvas(renderCard, { scale: 1.5, useCORS: true, backgroundColor: dynamicBgColor });
         const imageDataUrl = canvas.toDataURL("image/png");
 
         document.getElementById('generated-image-preview').src = imageDataUrl;
@@ -191,12 +217,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 const androidContent = document.getElementById("contentAndroid"); if(androidContent && liveSettings.androidGuide) androidContent.innerHTML = liveSettings.androidGuide;
                 const iphoneContent = document.getElementById("contentIphone"); if(iphoneContent && liveSettings.iphoneGuide) iphoneContent.innerHTML = liveSettings.iphoneGuide;
-
-                const instaCard = document.getElementById("instagram-card"); const cardTitle = document.querySelector(".card-title");
-                if(instaCard) {
-                    if(liveSettings.cardTheme === "theme-dark") { instaCard.style.backgroundColor = "#1e1e1e"; instaCard.style.color = "#ffffff"; if(cardTitle) cardTitle.style.color = "#ff4757"; } 
-                    else { instaCard.style.backgroundColor = "#fdfaf6"; instaCard.style.color = "#2d3436"; if(cardTitle) cardTitle.style.color = "#203a70"; }
-                }
             }
         });
     }
@@ -220,7 +240,6 @@ window.addEventListener("DOMContentLoaded", () => {
         tabIphone.onclick = () => { contentAndroid.style.display = 'none'; contentIphone.style.display = 'block'; tabAndroid.className = 'secondary'; tabIphone.className = 'primary'; };
     }
 
-    // 🔥 FIX: Challenge Button Image + Text Share Logic
     const challengeBtn = document.getElementById("challengeBtn");
     if (challengeBtn) {
         challengeBtn.addEventListener("click", async () => {
@@ -238,17 +257,12 @@ window.addEventListener("DOMContentLoaded", () => {
                         const blob = await (await fetch(imgUrl)).blob();
                         const file = new File([blob], "Challenge.png", { type: "image/png" });
                         
-                        // Check if device supports sharing file + text together
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             await navigator.share({ files: [file], title: "Screen Time Challenge", text: shareText });
                         } else {
-                            // Fallback for older devices (just text)
                             await navigator.share({ title: "Screen Time Challenge", text: shareText });
                         }
-                    } catch (e) {
-                        // Fallback if image fails to process
-                        await navigator.share({ title: "Screen Time Challenge", text: shareText });
-                    }
+                    } catch (e) { await navigator.share({ title: "Screen Time Challenge", text: shareText }); }
                 } else { 
                     navigator.clipboard.writeText(shareText); showToast("Challenge link copied 🔥", "success"); 
                 }
