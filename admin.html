@@ -62,6 +62,7 @@
         
         .delete-btn { background: rgba(255, 71, 87, 0.1); color: var(--primary); border: 1px solid var(--primary); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .nuke-btn { background: #e74c3c; color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); animation: pulseRed 2s infinite; }
+        .csv-btn { background: #27ae60; color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4); margin-right: 10px; }
         @keyframes pulseRed { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
         .cms-panel { background: var(--surface); padding: 30px; border-radius: 16px; border: 1px solid var(--border); max-width: 800px; box-shadow: 0 4px 15px var(--shadow); width: 100%; }
@@ -108,7 +109,10 @@
             <div id="tab-analytics" class="tab-content active">
                 <div class="header">
                     <h1>Command Center</h1>
-                    <button class="nuke-btn" onclick="nukeDatabase()"><i class="fa-solid fa-bomb"></i> SUNDAY NUKE (Clear All)</button>
+                    <div>
+                        <button class="csv-btn" onclick="downloadCSV()"><i class="fa-solid fa-file-csv"></i> Export Leads</button>
+                        <button class="nuke-btn" onclick="nukeDatabase()"><i class="fa-solid fa-bomb"></i> SUNDAY NUKE</button>
+                    </div>
                 </div>
 
                 <div class="stats-grid">
@@ -167,19 +171,24 @@
                             <option value="theme-dark">Dark Mode (Black/Neon Red)</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-heading"></i> 5. Guide Popup Title</label>
-                        <input type="text" id="cms-popup" placeholder="E.g., How to Check ⏳">
-                    </div>
                     
-                    <div class="form-group">
-                        <label><i class="fa-brands fa-android" style="color:#a4c639;"></i> 6. Full Android Guide Steps (HTML)</label>
-                        <textarea id="cms-android-guide" rows="4"></textarea>
+                    <div class="form-group" style="background: rgba(37, 211, 102, 0.05); border-color: #25D366;">
+                        <label><i class="fa-brands fa-whatsapp" style="color:#25D366;"></i> 5. WhatsApp Share Message</label>
+                        <textarea id="cms-whatsapp-text" rows="3" placeholder="Use {name}, {time}, and {link} as variables..."></textarea>
+                        <small style="color:var(--text-muted); display:block; margin-top:5px;">Example: ⚔️ {name} challenged you! Screen time: {time}. Beat me: {link}</small>
                     </div>
 
                     <div class="form-group">
-                        <label><i class="fa-brands fa-apple"></i> 7. Full iPhone Guide Steps (HTML)</label>
-                        <textarea id="cms-iphone-guide" rows="4"></textarea>
+                        <label><i class="fa-solid fa-heading"></i> 6. Guide Popup Title</label>
+                        <input type="text" id="cms-popup" placeholder="E.g., How to Check ⏳">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fa-brands fa-android" style="color:#a4c639;"></i> 7. Android Guide Steps (HTML)</label>
+                        <textarea id="cms-android-guide" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fa-brands fa-apple"></i> 8. iPhone Guide Steps (HTML)</label>
+                        <textarea id="cms-iphone-guide" rows="3"></textarea>
                     </div>
 
                     <button class="save-cms-btn" onclick="saveCMS()"><i class="fa-solid fa-bolt"></i> EXECUTE GOD COMMANDS</button>
@@ -254,6 +263,24 @@
             });
         }
 
+        // 🔥 NAYA: Download CSV Logic
+        function downloadCSV() {
+            let csv = 'Date,Nickname,Time (Min),Formatted Time\n';
+            document.querySelectorAll('.user-row').forEach(row => {
+                let cols = row.querySelectorAll('td');
+                if(cols.length >= 4) { csv += `"${cols[0].innerText}","${cols[1].innerText}","${cols[2].innerText}","${cols[3].innerText}"\n`; }
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "UCforU_Leads.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function updateChart(dataObj) {
             const ctx = document.getElementById('trafficChart').getContext('2d'); const labels = Object.keys(dataObj).sort().slice(-7); const vals = labels.map(d => dataObj[d]);
             if(trafficChartInstance) trafficChartInstance.destroy();
@@ -277,7 +304,6 @@
             }
         }
 
-        // 🔥 FIX: Load Full Guides into Textareas
         function loadCMS() {
             database.ref('app_settings').on('value', snap => {
                 if(snap.exists()) {
@@ -289,7 +315,7 @@
                     document.getElementById('cms-theme').value = s.cardTheme || 'theme-floral';
                     document.getElementById('cms-popup').value = s.popupTitle || 'How to Check ⏳';
                     
-                    // Default HTML text if nothing is saved yet
+                    document.getElementById('cms-whatsapp-text').value = s.whatsappText || "⚔️ {name} challenged you!\nMy screen time: {time}\nCan you beat me? 😎\n\n{link}";
                     document.getElementById('cms-android-guide').value = s.androidGuide || '<ol style="padding-left: 20px;"><li> Go to the phone\'s <b>Settings</b></li><li>Search <b>Digital Wellbeing & Screen Time.</b></li><li>Take <b>Screenshot</b> on Today Time.</li></ol>';
                     document.getElementById('cms-iphone-guide').value = s.iphoneGuide || '<ol style="padding-left: 20px;"><li>Go To iPhone <b>Settings</b>.</li><li>Search <b>Screen Time</b>.</li><li>Click On <b>See All Activity</b> And Take <b>Screenshot</b>.</li></ol>';
                     
@@ -298,7 +324,6 @@
             });
         }
 
-        // 🔥 FIX: Save Full Guides from Textareas
         function saveCMS() {
             const btn = document.querySelector('.save-cms-btn'); const originalText = btn.innerHTML;
             btn.innerHTML = "<i class='fa-solid fa-spinner fa-spin'></i> EXECUTING...";
@@ -310,8 +335,9 @@
                 customPrompt: document.getElementById('cms-custom-prompt').value,
                 cardTheme: document.getElementById('cms-theme').value,
                 popupTitle: document.getElementById('cms-popup').value,
-                androidGuide: document.getElementById('cms-android-guide').value, // Saved directly
-                iphoneGuide: document.getElementById('cms-iphone-guide').value    // Saved directly
+                whatsappText: document.getElementById('cms-whatsapp-text').value,
+                androidGuide: document.getElementById('cms-android-guide').value, 
+                iphoneGuide: document.getElementById('cms-iphone-guide').value    
             };
             
             database.ref('app_settings').set(data).then(() => {
