@@ -220,14 +220,38 @@ window.addEventListener("DOMContentLoaded", () => {
         tabIphone.onclick = () => { contentAndroid.style.display = 'none'; contentIphone.style.display = 'block'; tabAndroid.className = 'secondary'; tabIphone.className = 'primary'; };
     }
 
+    // 🔥 FIX: Challenge Button Image + Text Share Logic
     const challengeBtn = document.getElementById("challengeBtn");
     if (challengeBtn) {
         challengeBtn.addEventListener("click", async () => {
             try {
-                const safeName = currentNickname.replace(/[^a-zA-Z0-9]/g, "User"); const newChallengeID = safeName + "_" + Date.now(); const challengeLink = `${location.origin}${location.pathname}?challenge=${newChallengeID}`;
+                const safeName = currentNickname.replace(/[^a-zA-Z0-9]/g, "User"); const newChallengeID = safeName + "_" + Date.now(); 
+                const challengeLink = `${location.origin}${location.pathname}?challenge=${newChallengeID}`;
+                
                 if (database) database.ref("challenges/" + newChallengeID).set({ creator: currentNickname, creatorTime: currentUserTime, timestamp: firebase.database.ServerValue.TIMESTAMP });
-                if (navigator.share) await navigator.share({ title: "Screen Time Challenge", text: `⚔️ ${currentNickname} challenged you!\nMy screen time: ${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m\nCan you beat me? 😎\n\n${challengeLink}` });
-                else { navigator.clipboard.writeText(challengeLink); showToast("Challenge link copied 🔥", "success"); }
+                
+                const shareText = `⚔️ ${currentNickname} challenged you!\nMy screen time: ${Math.floor(currentUserTime/60)}h ${currentUserTime%60}m\nCan you beat me? 😎\n\n${challengeLink}`;
+                const imgUrl = document.getElementById('generated-image-preview').src;
+
+                if (navigator.share) {
+                    try {
+                        const blob = await (await fetch(imgUrl)).blob();
+                        const file = new File([blob], "Challenge.png", { type: "image/png" });
+                        
+                        // Check if device supports sharing file + text together
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: "Screen Time Challenge", text: shareText });
+                        } else {
+                            // Fallback for older devices (just text)
+                            await navigator.share({ title: "Screen Time Challenge", text: shareText });
+                        }
+                    } catch (e) {
+                        // Fallback if image fails to process
+                        await navigator.share({ title: "Screen Time Challenge", text: shareText });
+                    }
+                } else { 
+                    navigator.clipboard.writeText(shareText); showToast("Challenge link copied 🔥", "success"); 
+                }
             } catch (err) { console.error("Challenge failed", err); }
         });
     }
