@@ -12,11 +12,10 @@
     <meta property="og:title" content="Dare to beat my Screen Time? ⏳🔥">
     <meta property="og:description" content="My AI just roasted my screen time! Click here to accept the challenge.">
     <meta property="og:image" content="https://ucforu.online/preview.jpg">
-    <meta property="twitter:card" content="summary_large_image">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Inter:wght@400;500;600;800&family=Playfair+Display:ital,wght@0,600;0,700;1,500&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -25,6 +24,20 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <link rel="stylesheet" href="style.css">
+    
+    <style>
+        .brush-card { width: 400px; background: #ffffff; text-align: center; font-family: 'Inter', sans-serif; position: relative; padding: 30px; box-sizing: border-box; display: none; }
+        .brush-bg { background: #ffb8d1; padding: 50px 20px; margin: 10px -10px 30px -10px; border-radius: 8px; clip-path: polygon(1% 4%, 99% 1%, 98% 97%, 2% 99%); }
+        .brush-name { font-family: 'Great Vibes', cursive; font-size: 55px; color: #1e1e1e; margin: 0; line-height: 1; }
+        .brush-title { font-weight: 800; font-size: 22px; letter-spacing: 2px; margin-bottom: 20px; color: #000; }
+        .dotted-line { border-bottom: 5px dotted #ffb8d1; margin: 20px 0; }
+        .brush-time { font-weight: 700; font-size: 20px; margin: 20px 0; color: #e84393; }
+        .brush-shayari { font-size: 16px; color: #2d3436; margin: 30px 0; padding: 0 10px; line-height: 1.5; font-weight: 500; }
+        .brush-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; }
+        .brush-qr-box { background: #ffb8d1; padding: 10px; border-radius: 20px; display: flex; justify-content: center; align-items: center; }
+        .brush-social { text-align: right; font-size: 15px; color: #000; }
+        .brush-social strong { font-weight: 800; letter-spacing: 1px; }
+    </style>
 </head>
 <body>
 
@@ -111,6 +124,7 @@
 </main>
 
 <div id="card-render-container">
+    
     <div id="instagram-card" class="instagram-card">
         <div class="floral-top">🌿</div>
         <div class="card-header-icon">🌸</div>
@@ -120,16 +134,24 @@
         <div class="card-time" id="render-time">0h 0m screen time</div>
         <div class="card-shayari" id="render-shayari">Shayari goes here</div>
         <div class="card-divider">❤️─────💐─────❤️</div>
-        <div class="card-footer">
-            ucforu.online<br>
-            <span style="font-size: 50px; margin-top:50px; display:inline-block;">🌸</span>
-        </div>
-        <br>
-        <div id="viral-card">
-            <div id="qrcode-container"></div>
-        </div>
+        <div class="card-footer">ucforu.online<br><span style="font-size: 50px; margin-top:50px; display:inline-block;">🌸</span></div><br>
+        <div id="viral-card"><div id="qrcode-container"></div></div>
         <div class="floral-bottom">🌿</div>
     </div>
+
+    <div id="brush-card" class="brush-card">
+        <div class="brush-bg"><div class="brush-name" id="brush-name">Name</div></div>
+        <div class="brush-title">SCREEN TIME</div>
+        <div class="dotted-line"></div>
+        <div class="brush-time" id="brush-time">Time Here</div>
+        <div class="brush-shayari" id="brush-shayari">Meme goes here</div>
+        <div class="dotted-line"></div>
+        <div class="brush-footer">
+            <div class="brush-qr-box"><div id="brush-qrcode-container"></div></div>
+            <div class="brush-social"><strong>FOLLOW US:</strong><br>@ucforu<br>ucforu.online</div>
+        </div>
+    </div>
+
 </div>
 
 <script src="script.js"></script>
