@@ -26,13 +26,14 @@
     <link rel="stylesheet" href="style.css">
     
     <style>
+        /* Pink Brush Card CSS - Hidden by default */
         .brush-card { width: 400px; background: #ffffff; text-align: center; font-family: 'Inter', sans-serif; position: relative; padding: 30px; box-sizing: border-box; display: none; }
         .brush-bg { background: #ffb8d1; padding: 50px 20px; margin: 10px -10px 30px -10px; border-radius: 8px; clip-path: polygon(1% 4%, 99% 1%, 98% 97%, 2% 99%); }
         .brush-name { font-family: 'Great Vibes', cursive; font-size: 55px; color: #1e1e1e; margin: 0; line-height: 1; }
         .brush-title { font-weight: 800; font-size: 22px; letter-spacing: 2px; margin-bottom: 20px; color: #000; }
         .dotted-line { border-bottom: 5px dotted #ffb8d1; margin: 20px 0; }
         .brush-time { font-weight: 700; font-size: 20px; margin: 20px 0; color: #e84393; }
-        .brush-shayari { font-size: 16px; color: #2d3436; margin: 30px 0; padding: 0 10px; line-height: 1.5; font-weight: 500; }
+        .brush-shayari { font-size: 16px; color: #2d3436; margin: 30px 0; padding: 0 10px; line-height: 1.5; font-weight: 500; font-style: italic; }
         .brush-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; }
         .brush-qr-box { background: #ffb8d1; padding: 10px; border-radius: 20px; display: flex; justify-content: center; align-items: center; }
         .brush-social { text-align: right; font-size: 15px; color: #000; }
@@ -94,13 +95,13 @@
     <div id="processing" class="glass-card">
         <div class="spinner"></div>
         <h2>Analyzing Image...❤️</h2>
-        <p id="loading-text" style="margin-top:10px; opacity:0.8; font-weight: 600;">Scanning your digital footprint... 📱</p>
+        <p id="loading-text" style="margin-top:10px; opacity:0.8; font-weight: 600; color: #ff4757;">Scanning your digital footprint... 📱</p>
     </div>
 
     <div id="result" class="glass-card">
         <h2>Your Card❤️</h2>
         <p style="margin-bottom: 20px; font-size: 0.9rem;">Long press image to save, or use button below.</p>
-        <img id="generated-image-preview" src="" alt="Your Screen Time Card">
+        <img id="generated-image-preview" src="" alt="Your Screen Time Card" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
         <button id="downloadBtn" class="primary">Download Card ⬇️</button>
         <button id="shareBtn" class="primary">Share Link 🔗</button>
         <button id="challengeBtn" class="primary">Challenge Friends ⚔️</button>
@@ -123,7 +124,7 @@
     </div>
 </main>
 
-<div id="card-render-container">
+<div id="card-render-container" style="position: absolute; left: -9999px; top: -9999px;">
     
     <div id="instagram-card" class="instagram-card">
         <div class="floral-top">🌿</div>
