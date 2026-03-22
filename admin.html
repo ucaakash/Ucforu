@@ -164,11 +164,13 @@
                         </select>
                         <textarea id="cms-custom-prompt" rows="3" style="display:none; margin-top: 10px; border-color: var(--secondary);" placeholder="Type exactly how AI should act..."></textarea>
                     </div>
+                    
                     <div class="form-group">
                         <label><i class="fa-solid fa-palette"></i> 4. Instagram Card Theme</label>
                         <select id="cms-theme">
-                            <option value="theme-floral">Light Aesthetic (Floral)</option>
+                            <option value="theme-floral">Light Aesthetic (Floral - Dynamic Color)</option>
                             <option value="theme-dark">Dark Mode (Black/Neon Red)</option>
+                            <option value="theme-brush">🎨 Pink Brush Style (New Option!)</option>
                         </select>
                     </div>
                     
@@ -263,7 +265,6 @@
             });
         }
 
-        // 🔥 NAYA: Download CSV Logic
         function downloadCSV() {
             let csv = 'Date,Nickname,Time (Min),Formatted Time\n';
             document.querySelectorAll('.user-row').forEach(row => {
