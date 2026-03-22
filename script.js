@@ -20,7 +20,7 @@ if (!myDeviceId) {
     localStorage.setItem('ucforu_device_id', myDeviceId);
 }
 
-// Default settings (Floral is set as primary to trigger Dynamic Colors)
+// Default settings
 let liveSettings = { 
     aiRoast: "poetic", customPrompt: "", cardTheme: "theme-floral", 
     popupTitle: "How to Check ⏳", isMaintenance: false, announcementText: "",
@@ -59,13 +59,13 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     const nickname = document.getElementById('nickname').value.trim();
     const file = document.getElementById('screenshot').files[0];
     
-    if (nickname.length < 3) { showToast("Naam kam se kam 3 letters ka hona chahiye! ❤️", "error"); return; }
-    if (!file) { showToast("Please upload screenshot! ❤️", "error"); return; }
+    // 🔥 UPDATED: English Error Notifications
+    if (nickname.length < 3) { showToast("Name must be at least 3 characters long! ❤️", "error"); return; }
+    if (!file) { showToast("Please upload a screenshot! ❤️", "error"); return; }
     
     document.getElementById('inputForm').style.display = 'none';
     document.getElementById('processing').style.display = 'block';
 
-    // 🔥 HYPE BUILDER: Sarcastic Loading Texts
     const loadingTextEl = document.getElementById('loading-text');
     const loadingMessages = [
         "Scanning your Instagram addiction... 📱", 
@@ -101,61 +101,43 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         currentUserTime = totalMinutes; currentNickname = nickname;
         const timeString = `${aiData.hours}h ${aiData.minutes}m`;
 
-        // Update Original Floral Card
         document.getElementById('render-name').innerText = nickname;
         document.getElementById('render-time').innerText = `${timeString} screen time`;
         document.getElementById('render-shayari').innerText = `"${aiData.shayari}"`;
         
-        // Update New Brush Card
         document.getElementById('brush-name').innerText = nickname;
         document.getElementById('brush-time').innerText = `${timeString} screen time`;
         document.getElementById('brush-shayari').innerText = `"${aiData.shayari}"`;
 
-        // Generate QR Codes
         document.getElementById("qrcode-container").innerHTML = "";
         new QRCode(document.getElementById("qrcode-container"), { text: "https://ucforu.online", width: 130, height: 130 });
         document.getElementById("brush-qrcode-container").innerHTML = "";
         new QRCode(document.getElementById("brush-qrcode-container"), { text: "https://ucforu.online", width: 90, height: 90 });
 
-        // 🔥 THEME & DYNAMIC COLOR LOGIC
         let targetCardId = 'instagram-card';
-        let dynamicBgColor = "#ffffff"; 
+        let dynamicBgColor = "#fdfaf6"; 
 
         if (liveSettings.cardTheme === "theme-brush") {
-            // Theme 2: Brush (Static Pink)
             targetCardId = 'brush-card';
             document.getElementById('instagram-card').style.display = 'none';
             document.getElementById('brush-card').style.display = 'block';
+            dynamicBgColor = "#ffffff";
         } else {
-            // Theme 1: Floral (DYNAMIC COLORS based on user time)
             document.getElementById('brush-card').style.display = 'none';
             document.getElementById('instagram-card').style.display = 'block';
+            
             const instaCard = document.getElementById('instagram-card');
             const cardTitle = document.querySelector(".card-title");
             
-            if (aiData.hours < 4) { 
-                // 0-4 hours: Safe (White)
-                dynamicBgColor = "#ffffff"; 
-                instaCard.style.color = "#2d3436"; 
-                if (cardTitle) cardTitle.style.color = "#2ed573"; 
-            } else if (aiData.hours >= 4 && aiData.hours < 10) { 
-                // 4-10 hours: Warning (Light Pink)
-                dynamicBgColor = "#ffe4e1"; 
-                instaCard.style.color = "#2d3436"; 
-                if (cardTitle) cardTitle.style.color = "#e84393"; 
-            } else { 
-                // 10-24 hours: Danger (Black)
-                dynamicBgColor = "#1e1e1e"; 
-                instaCard.style.color = "#ffffff"; 
-                if (cardTitle) cardTitle.style.color = "#ff4757"; 
-            }
+            dynamicBgColor = "#fdfaf6"; 
+            instaCard.style.color = "#2d3436"; 
+            if (cardTitle) cardTitle.style.color = "#203a70"; 
             instaCard.style.backgroundColor = dynamicBgColor;
         }
 
         await new Promise(resolve => setTimeout(resolve, 300));
         await document.fonts.ready;
 
-        // Render Card Image
         const renderCard = document.getElementById(targetCardId);
         const canvas = await html2canvas(renderCard, { scale: 1.5, useCORS: true, backgroundColor: dynamicBgColor });
         const imageDataUrl = canvas.toDataURL("image/png");
@@ -166,7 +148,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
         document.getElementById('processing').style.display = 'none';
         document.getElementById('result').style.display = 'block';
 
-        // 🎉 CONFETTI BLAST
         if (typeof confetti === "function") {
             confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 }, zIndex: 10000 });
         }
@@ -178,9 +159,11 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     } catch (error) {
         clearInterval(loadingInterval); console.error(error);
         document.getElementById('processing').style.display = 'none'; document.getElementById('inputForm').style.display = 'block';
-        if (error.message === "OWN_CARD") showToast("Yeh toh hamara hi card hai! 😂 Asli photo daaliye.", "error");
-        else if (error.message === "FAKE_PHOTO") showToast("Fake Alert! 🚨 Sahi Screenshot daaliye.", "error");
-        else showToast("Server busy ya image clear nahi hai. Try again!", "error");
+        
+        // 🔥 UPDATED: English Error Notifications for Catch Block
+        if (error.message === "OWN_CARD") showToast("This is our own card! 😂 Please upload your screenshot.", "error");
+        else if (error.message === "FAKE_PHOTO") showToast("Fake Alert! 🚨 Please upload a valid Screen Time screenshot.", "error");
+        else showToast("Server is busy or image is unclear. Please try again!", "error");
     }
 });
 
@@ -241,11 +224,10 @@ function showToast(message, type = "info") {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    // Admin Setting Sync
     if(database) {
         database.ref('app_settings').on('value', (snap) => {
             if(snap.exists()) {
-                liveSettings = Object.assign(liveSettings, snap.val()); // Merge updates
+                liveSettings = Object.assign(liveSettings, snap.val()); 
                 
                 const inputForm = document.getElementById('inputForm'); const maintenanceMsg = document.getElementById('maintenance-msg'); const resultBlock = document.getElementById('result');
                 if (liveSettings.isMaintenance) { if (inputForm) inputForm.style.display = 'none'; if (maintenanceMsg) maintenanceMsg.style.display = 'block'; } 
@@ -281,7 +263,6 @@ window.addEventListener("DOMContentLoaded", () => {
         tabIphone.onclick = () => { contentAndroid.style.display = 'none'; contentIphone.style.display = 'block'; tabAndroid.className = 'secondary'; tabIphone.className = 'primary'; };
     }
 
-    // 🔥 CHALLENGE SHARE (Photo + Sarcastic Text + Link)
     const challengeBtn = document.getElementById("challengeBtn");
     if (challengeBtn) {
         challengeBtn.addEventListener("click", async () => {
