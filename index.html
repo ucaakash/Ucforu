@@ -7,11 +7,6 @@
     
     <meta name="title" content="UCforU - AI Screen Time Roast & Challenge ⏳🔥">
     <meta name="description" content="Find out your screen time addiction! Upload your screenshot, get roasted by our AI, and challenge your friends to beat your score.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://ucforu.online/">
-    <meta property="og:title" content="Dare to beat my Screen Time? ⏳🔥">
-    <meta property="og:description" content="My AI just roasted my screen time! Click here to accept the challenge.">
-    <meta property="og:image" content="https://ucforu.online/preview.jpg">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,32 +14,13 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <link rel="stylesheet" href="style.css">
-    
-    <style>
-        /* Pink Brush Card CSS - Hidden by default */
-        .brush-card { width: 400px; background: #ffffff; text-align: center; font-family: 'Inter', sans-serif; position: relative; padding: 30px; box-sizing: border-box; display: none; }
-        .brush-bg { background: #ffb8d1; padding: 50px 20px; margin: 10px -10px 30px -10px; border-radius: 8px; clip-path: polygon(1% 4%, 99% 1%, 98% 97%, 2% 99%); }
-        .brush-name { font-family: 'Great Vibes', cursive; font-size: 55px; color: #1e1e1e; margin: 0; line-height: 1; }
-        .brush-title { font-weight: 800; font-size: 22px; letter-spacing: 2px; margin-bottom: 20px; color: #000; }
-        .dotted-line { border-bottom: 5px dotted #ffb8d1; margin: 20px 0; }
-        .brush-time { font-weight: 700; font-size: 20px; margin: 20px 0; color: #e84393; }
-        .brush-shayari { font-size: 16px; color: #2d3436; margin: 30px 0; padding: 0 10px; line-height: 1.5; font-weight: 500; font-style: italic; }
-        .brush-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; }
-        .brush-qr-box { background: #ffb8d1; padding: 10px; border-radius: 20px; display: flex; justify-content: center; align-items: center; }
-        .brush-social { text-align: right; font-size: 15px; color: #000; }
-        .brush-social strong { font-weight: 800; letter-spacing: 1px; }
-    </style>
 </head>
 <body>
-
-<div id="live-marquee" style="display: none; background: #ff4757; color: white; padding: 10px; font-weight: bold; font-family: 'Inter', sans-serif; font-size: 14px;">
-    <marquee id="marquee-text" scrollamount="8">Welcome to UCforU!</marquee>
-</div>
 
 <header>
     <h1>Ucforu</h1>
@@ -57,9 +33,9 @@
     
     <p id="guideBtn" style="color: #2d3436; font-weight: 600; cursor: pointer; margin-bottom: 15px; font-size: 0.9rem; text-align: center;">[How to take a screenshot?(Guide)❤️]</p>
 
-    <div id="guideModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
-        <div class="glass-card" style="position: relative; max-width: 400px; width: 100%; margin: 0; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);">
-            <span id="closeGuide" style="position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: white;">&times;</span>
+    <div id="guideModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center; padding: 20px;">
+        <div class="glass-card" style="position: relative; max-width: 400px; width: 100%; margin: 0; background: rgba(255,255,255,0.95); border: 1px solid rgba(255,255,255,0.4);">
+            <span id="closeGuide" style="position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; color: #333;">&times;</span>
             <h2 style="text-align: center; margin-bottom: 20px;">How to Check ⏳</h2>
             <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                 <button id="tabAndroid" class="primary" style="padding: 10px; margin: 0; font-size: 1rem;">Android</button>
@@ -75,11 +51,6 @@
         </div>
     </div>
 
-    <div id="maintenance-msg" class="glass-card" style="display: none; border-color: #ff4757; text-align: center;">
-        <h2 style="color: #ff4757;">🚧 Under Maintenance</h2>
-        <p style="margin-top: 10px; font-weight: 600;">Servers are too busy! Please come back in 5 minutes. ❤️</p>
-    </div>
-
     <div id="inputForm" class="glass-card">
         <div class="input-group">
             <label for="nickname">Your Name❤️</label>
@@ -92,25 +63,31 @@
         <button id="analyzeBtn" class="primary">Reveal My Digital Self</button>
     </div>
 
-    <div id="processing" class="glass-card">
+    <div id="processing" class="glass-card" style="display: none;">
         <div class="spinner"></div>
         <h2>Analyzing Image...❤️</h2>
         <p id="loading-text" style="margin-top:10px; opacity:0.8; font-weight: 600; color: #ff4757;">Scanning your digital footprint... 📱</p>
     </div>
 
-    <div id="result" class="glass-card">
+    <div id="result" class="glass-card" style="display: none;">
         <h2>Your Card❤️</h2>
         <p style="margin-bottom: 20px; font-size: 0.9rem;">Long press image to save, or use button below.</p>
-        <img id="generated-image-preview" src="" alt="Your Screen Time Card" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <img id="generated-image-preview" src="" alt="Your Screen Time Card" style="border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; margin-bottom: 20px;">
+
         <button id="downloadBtn" class="primary">Download Card ⬇️</button>
-<button id="shareBtn" class="primary" style="background: linear-gradient(to right, #11998e, #38ef7d); box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4);">Share Link 🔗</button>
-<button id="challengeBtn" class="primary" style="background: linear-gradient(to right, #f7b733, #fc4a1a); box-shadow: 0 4px 15px rgba(252, 74, 26, 0.4);">Challenge Friends ⚔️</button>
+        <button id="shareBtn" class="primary" style="background: linear-gradient(to right, #11998e, #38ef7d); box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4);">Share Link 🔗</button>
+        <button id="challengeBtn" class="primary" style="background: linear-gradient(to right, #f7b733, #fc4a1a); box-shadow: 0 4px 15px rgba(252, 74, 26, 0.4);">Challenge Friends ⚔️</button>
+    </div>
 
     <div id="leaderboard" class="glass-card">
         <h2 style="text-align: center;">❤️ Leaderboard (Today)</h2>
-        <table class="leaderboard-table">
+        <table class="leaderboard-table" style="width: 100%;">
             <thead>
-                <tr><th class="rank">#</th><th>Name</th><th class="time">Time</th></tr>
+                <tr>
+                    <th class="rank">#</th>
+                    <th style="text-align: left;">Name</th>
+                    <th class="time" style="text-align: right;">Time</th>
+                </tr>
             </thead>
             <tbody id="leaderboardBody">
                 <tr><td colspan="3" style="text-align:center;">Loading...</td></tr>
@@ -124,7 +101,6 @@
 </main>
 
 <div id="card-render-container" style="position: absolute; left: -9999px; top: -9999px;">
-    
     <div id="instagram-card" class="instagram-card">
         <div class="floral-top">🌿</div>
         <div class="card-header-icon">🌸🌸</div>
@@ -138,20 +114,6 @@
         <div id="viral-card"><div id="qrcode-container"></div></div>
         <div class="floral-bottom">🌿</div>
     </div>
-
-    <div id="brush-card" class="brush-card">
-        <div class="brush-bg"><div class="brush-name" id="brush-name">Name</div></div>
-        <div class="brush-title">SCREEN TIME</div>
-        <div class="dotted-line"></div>
-        <div class="brush-time" id="brush-time">Time Here</div>
-        <div class="brush-shayari" id="brush-shayari">Meme goes here</div>
-        <div class="dotted-line"></div>
-        <div class="brush-footer">
-            <div class="brush-qr-box"><div id="brush-qrcode-container"></div></div>
-            <div class="brush-social"><strong>FOLLOW US:</strong><br>@ucforu<br>ucforu.online</div>
-        </div>
-    </div>
-
 </div>
 
 <script src="script.js"></script>
